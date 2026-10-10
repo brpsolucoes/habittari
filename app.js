@@ -1,0 +1,1070 @@
+/**
+ * ==============================================================================
+ * HABITTARI - CATÁLOGO DIGITAL ESTÁTICO (GITHUB PAGES READY)
+ * ==============================================================================
+ * Arquitetura Vanilla JavaScript Modular
+ * - Consumo de dados via Google Sheets (formato CSV público)
+ * - Persistência de carrinho em LocalStorage
+ * - Interface Mobile-first reativa com Tailwind CSS
+ * - Checkout direto para o WhatsApp
+ * ==============================================================================
+ */
+
+// ==============================================================================
+// 1. CONFIGURAÇÕES & CONSTANTES GLOBAIS
+// ==============================================================================
+
+/**
+ * URL do CSV publicado da sua planilha do Google Sheets.
+ * 
+ * Como obter essa URL:
+ * 1. No Google Sheets: Arquivo > Compartilhar > Publicar na Web.
+ * 2. Em "Link", selecione a aba desejada e troque "Página da Web" por "Valores separados por vírgula (.csv)".
+ * 3. Clique em Publicar e cole a URL gerada abaixo.
+ * 
+ * As colunas obrigatórias no cabeçalho da planilha são:
+ * - id
+ * - nome
+ * - descricao
+ * - preco
+ * - imagens (URLs separadas por vírgula)
+ */
+const GOOGLE_SHEETS_CSV_URL = ""; 
+
+/**
+ * Número do WhatsApp para recebimento dos pedidos (DDI + DDD + Telefone, apenas números).
+ * Exemplo para Brasil (SP): 5511999999999
+ */
+const WHATSAPP_PHONE_NUMBER = "5511999999999";
+
+/**
+ * Chave de armazenamento no LocalStorage para o carrinho
+ */
+const STORAGE_CART_KEY = "habittari_cart_v1";
+
+/**
+ * Placeholder para produtos sem imagem cadastrada
+ */
+const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80";
+
+/**
+ * Dados de demonstração (fallback inteligente):
+ * Usado automaticamente caso GOOGLE_SHEETS_CSV_URL esteja vazio ou a requisição falhe,
+ * garantindo que a aplicação sempre funcione imediatamente para testes locais e demonstração.
+ */
+const DEMO_PRODUCTS = [
+  {
+    id: "prod-1",
+    nome: "Poltrona Nórdica Bouclé",
+    descricao: "Design escandinavo com revestimento em tecido bouclé de alta gramatura e pés em madeira maciça de carvalho. Perfeita para salas de estar elegantes e cantos de leitura aconchegantes.",
+    preco: 1290.00,
+    imagens: [
+      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1580481077195-c22ae0062a4b?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=80"
+    ]
+  },
+  {
+    id: "prod-2",
+    nome: "Mesa de Centro Minimalista",
+    descricao: "Estrutura geométrica em aço carbono com pintura eletrostática preta fosca e tampo duplo em mármore sintético branco carrara. Durabilidade e sofisticação atemporal.",
+    preco: 840.50,
+    imagens: [
+      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=900&q=80"
+    ]
+  },
+  {
+    id: "prod-3",
+    nome: "Luminária de Piso Industrial Arco",
+    descricao: "Luminária de piso contemporânea com base sólida em pedra sabão e cúpula articulada em latão escovado. Compatível com lâmpadas inteligentes E27.",
+    preco: 499.90,
+    imagens: [
+      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=80"
+    ]
+  },
+  {
+    id: "prod-4",
+    nome: "Vaso de Cerâmica Terracota Artesanal",
+    descricao: "Peça modelada manualmente com argila natural e acabamento rústico impermeabilizado. Ideal para folhagens secas, eucalipto ou arranjos florais minimalistas.",
+    preco: 145.00,
+    imagens: [
+      "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=900&q=80"
+    ]
+  },
+  {
+    id: "prod-5",
+    nome: "Espelho Orgânico com Moldura em Carvalho",
+    descricao: "Espelho lapidado com linhas fluidas e assimétricas. Moldura artesanal em lâmina de madeira nobre com suporte duplo para instalação vertical ou horizontal.",
+    preco: 620.00,
+    imagens: [
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=80"
+    ]
+  },
+  {
+    id: "prod-6",
+    nome: "Manta 100% Algodão com Franjas",
+    descricao: "Trama macia em tear manual com fios selecionados de algodão puro. Proporciona textura tátil e sensação de conforto para sofás e camas.",
+    preco: 189.90,
+    imagens: [
+      "https://images.unsplash.com/photo-1606744837616-56c9a5c6a6eb?auto=format&fit=crop&w=900&q=80"
+    ]
+  }
+];
+
+// ==============================================================================
+// 2. ESTADO GLOBAL DA APLICAÇÃO (STATE MANAGEMENT)
+// ==============================================================================
+
+const AppState = {
+  products: [],
+  filteredProducts: [],
+  cart: [],
+  modalProduct: null,
+  activeImageIndex: 0,
+  modalQuantity: 1,
+  searchQuery: "",
+  sortBy: "default",
+  isCartOpen: false,
+  isProductModalOpen: false
+};
+
+// ==============================================================================
+// 3. UTILITÁRIOS E HELPERS
+// ==============================================================================
+
+/**
+ * Formata um valor numérico para a moeda Real Brasileiro (BRL)
+ * @param {number} value
+ * @returns {string} Ex: "R$ 1.250,00"
+ */
+function formatBRL(value) {
+  const safeNumber = isNaN(value) ? 0 : Number(value);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(safeNumber);
+}
+
+/**
+ * Converte strings de preço em número float confiável.
+ * Lida com valores como "1.250,50", "150,00", "150.00", "R$ 99,90"
+ * @param {string|number} priceStr
+ * @returns {number}
+ */
+function parsePrice(priceStr) {
+  if (typeof priceStr === "number") return priceStr;
+  if (!priceStr) return 0;
+
+  let cleaned = priceStr.toString().replace(/[^\d.,]/g, "").trim();
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    // Ex: 1.250,50 -> 1250.50
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (cleaned.includes(",")) {
+    // Ex: 150,50 -> 150.50
+    cleaned = cleaned.replace(",", ".");
+  }
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+/**
+ * Parser RFC-4180 robusto para CSV.
+ * Lida com aspas, quebras de linha e vírgulas internas em campos como descrições ou listas de imagens.
+ * @param {string} text
+ * @returns {string[][]} Matriz de linhas e colunas
+ */
+function parseCSV(text) {
+  const rows = [];
+  let currentRow = [""];
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Aspas duplas escapadas dentro de campo com aspas
+        currentRow[currentRow.length - 1] += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      currentRow.push("");
+    } else if ((char === "\r" || char === "\n") && !inQuotes) {
+      if (char === "\r" && nextChar === "\n") {
+        i++;
+      }
+      if (currentRow.length > 1 || currentRow[0].trim() !== "") {
+        rows.push(currentRow);
+      }
+      currentRow = [""];
+    } else {
+      currentRow[currentRow.length - 1] += char;
+    }
+  }
+
+  if (currentRow.length > 1 || currentRow[0].trim() !== "") {
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
+/**
+ * Exibe notificação temporária (Toast)
+ * @param {string} message
+ */
+let toastTimeout;
+function showToast(message) {
+  const toast = document.getElementById("toastNotification");
+  const msgEl = document.getElementById("toastMessage");
+  if (!toast || !msgEl) return;
+
+  msgEl.textContent = message;
+  toast.classList.remove("hidden");
+
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 2800);
+}
+
+// ==============================================================================
+// 4. PERSISTÊNCIA DO CARRINHO (LOCALSTORAGE)
+// ==============================================================================
+
+function loadCartFromStorage() {
+  try {
+    const stored = localStorage.getItem(STORAGE_CART_KEY);
+    AppState.cart = stored ? JSON.parse(stored) : [];
+  } catch (err) {
+    console.error("Erro ao carregar carrinho do localStorage:", err);
+    AppState.cart = [];
+  }
+  updateCartCounters();
+}
+
+function saveCartToStorage() {
+  try {
+    localStorage.setItem(STORAGE_CART_KEY, JSON.stringify(AppState.cart));
+  } catch (err) {
+    console.error("Erro ao salvar carrinho no localStorage:", err);
+  }
+  updateCartCounters();
+}
+
+/**
+ * Adiciona um produto ao carrinho ou incrementa sua quantidade
+ * @param {object} product
+ * @param {number} quantity
+ */
+function addToCart(product, quantity = 1) {
+  if (!product || !product.id) return;
+  const qtyToAdd = Math.max(1, parseInt(quantity, 10) || 1);
+
+  const existingIndex = AppState.cart.findIndex(item => item.product.id === product.id);
+
+  if (existingIndex > -1) {
+    AppState.cart[existingIndex].quantity += qtyToAdd;
+  } else {
+    AppState.cart.push({
+      product: {
+        id: product.id,
+        nome: product.nome,
+        preco: product.preco,
+        imagem: (product.imagens && product.imagens.length > 0) ? product.imagens[0] : PLACEHOLDER_IMAGE
+      },
+      quantity: qtyToAdd
+    });
+  }
+
+  saveCartToStorage();
+  showToast(`"${product.nome}" adicionado ao carrinho!`);
+  renderCartModal();
+}
+
+/**
+ * Atualiza a quantidade de um item no carrinho
+ * @param {string} productId
+ * @param {number} delta Variação (+1 ou -1)
+ */
+function updateItemQuantity(productId, delta) {
+  const itemIndex = AppState.cart.findIndex(item => item.product.id === productId);
+  if (itemIndex === -1) return;
+
+  AppState.cart[itemIndex].quantity += delta;
+
+  if (AppState.cart[itemIndex].quantity <= 0) {
+    AppState.cart.splice(itemIndex, 1);
+  }
+
+  saveCartToStorage();
+  renderCartModal();
+}
+
+/**
+ * Remove um item do carrinho completamente
+ * @param {string} productId
+ */
+function removeFromCart(productId) {
+  AppState.cart = AppState.cart.filter(item => item.product.id !== productId);
+  saveCartToStorage();
+  renderCartModal();
+}
+
+/**
+ * Atualiza os contadores numéricos de itens do carrinho na interface
+ */
+function updateCartCounters() {
+  const totalItems = AppState.cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const headerBadge = document.getElementById("headerCartCount");
+  const floatingBadge = document.getElementById("floatingCartCount");
+  const summaryCount = document.getElementById("cartItemSummaryCount");
+
+  if (headerBadge) headerBadge.textContent = totalItems;
+  if (floatingBadge) floatingBadge.textContent = totalItems;
+  if (summaryCount) {
+    summaryCount.textContent = totalItems === 1 ? "1 item selecionado" : `${totalItems} itens selecionados`;
+  }
+}
+
+/**
+ * Calcula o valor total do carrinho
+ * @returns {number}
+ */
+function getCartTotal() {
+  return AppState.cart.reduce((total, item) => {
+    return total + (item.product.preco * item.quantity);
+  }, 0);
+}
+
+// ==============================================================================
+// 5. CARREGAMENTO E CONSUMO DOS DADOS (GOOGLE SHEETS CSV)
+// ==============================================================================
+
+/**
+ * Realiza o split das imagens separadas por vírgula na coluna 'imagens'
+ * @param {string} imagensField
+ * @returns {string[]} Lista de URLs limpas
+ */
+function splitImageUrls(imagensField) {
+  if (!imagensField || typeof imagensField !== "string") {
+    return [PLACEHOLDER_IMAGE];
+  }
+
+  const urls = imagensField
+    .split(",")
+    .map(url => url.trim())
+    .filter(url => url.length > 0 && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")));
+
+  return urls.length > 0 ? urls : [PLACEHOLDER_IMAGE];
+}
+
+/**
+ * Faz o fetch do CSV e popula o AppState.products
+ */
+async function fetchProductsFromSheets() {
+  const skeleton = document.getElementById("loadingSkeleton");
+  const grid = document.getElementById("productsGrid");
+  const errorState = document.getElementById("errorState");
+  const emptyState = document.getElementById("emptyState");
+
+  // Se o usuário não configurou a URL ou ela for vazia, usamos os dados de exemplo
+  if (!GOOGLE_SHEETS_CSV_URL || GOOGLE_SHEETS_CSV_URL.trim() === "") {
+    console.warn("GOOGLE_SHEETS_CSV_URL não configurada. Carregando catálogo demonstrativo de fallback...");
+    AppState.products = DEMO_PRODUCTS;
+    AppState.filteredProducts = [...AppState.products];
+    renderProducts();
+    if (skeleton) skeleton.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    if (skeleton) skeleton.classList.remove("hidden");
+    if (grid) grid.classList.add("hidden");
+    if (errorState) errorState.classList.add("hidden");
+    if (emptyState) emptyState.classList.add("hidden");
+
+    const response = await fetch(GOOGLE_SHEETS_CSV_URL, { cache: "no-cache" });
+    if (!response.ok) {
+      throw new Error(`Erro HTTP ao buscar planilha: ${response.status} ${response.statusText}`);
+    }
+
+    const csvText = await response.text();
+    const parsedRows = parseCSV(csvText);
+
+    if (parsedRows.length < 2) {
+      throw new Error("A planilha está vazia ou não contém produtos cadastrados.");
+    }
+
+    // Identificar índices das colunas no cabeçalho
+    const headerRow = parsedRows[0].map(col => col.trim().toLowerCase());
+    const idIdx = headerRow.findIndex(h => h === "id");
+    const nomeIdx = headerRow.findIndex(h => h === "nome" || h === "produto");
+    const descIdx = headerRow.findIndex(h => h === "descricao" || h === "descrição");
+    const precoIdx = headerRow.findIndex(h => h === "preco" || h === "preço" || h === "valor");
+    const imagensIdx = headerRow.findIndex(h => h === "imagens" || h === "imagem" || h === "fotos");
+
+    if (nomeIdx === -1 || precoIdx === -1) {
+      throw new Error("Cabeçalho inválido no CSV. Certifique-se de ter as colunas: id, nome, descricao, preco, imagens.");
+    }
+
+    // Mapear linhas de dados
+    const products = [];
+    for (let i = 1; i < parsedRows.length; i++) {
+      const row = parsedRows[i];
+      if (!row || row.length === 0 || !row[nomeIdx] || row[nomeIdx].trim() === "") continue;
+
+      const rawId = (idIdx !== -1 && row[idIdx]) ? row[idIdx].trim() : `prod-${i}`;
+      const nome = row[nomeIdx].trim();
+      const descricao = (descIdx !== -1 && row[descIdx]) ? row[descIdx].trim() : "Sem descrição detalhada.";
+      const preco = parsePrice(row[precoIdx]);
+      const rawImagens = (imagensIdx !== -1 && row[imagensIdx]) ? row[imagensIdx] : "";
+      const imagens = splitImageUrls(rawImagens);
+
+      products.push({
+        id: rawId,
+        nome,
+        descricao,
+        preco,
+        imagens
+      });
+    }
+
+    AppState.products = products;
+    AppState.filteredProducts = [...products];
+
+    if (skeleton) skeleton.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    renderProducts();
+
+  } catch (error) {
+    console.error("Falha ao obter produtos via Google Sheets:", error);
+    
+    // Fallback gracioso com dados de demonstração
+    console.info("Ativando produtos demonstrativos para permitir a navegação do usuário.");
+    AppState.products = DEMO_PRODUCTS;
+    AppState.filteredProducts = [...AppState.products];
+
+    if (skeleton) skeleton.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    renderProducts();
+
+    // Notifica visualmente que está em modo de fallback
+    showToast("Exibindo produtos de teste. Conecte sua planilha Google Sheets.");
+  }
+}
+
+// ==============================================================================
+// 6. RENDERIZAÇÃO DA INTERFACE PRINCIPAL (GRID DE PRODUTOS)
+// ==============================================================================
+
+/**
+ * Renderiza o grid de produtos
+ */
+function renderProducts() {
+  const grid = document.getElementById("productsGrid");
+  const countLabel = document.getElementById("productsCount");
+  const emptyState = document.getElementById("emptyState");
+
+  if (!grid) return;
+
+  // Filtragem por busca
+  let list = AppState.products.filter(item => {
+    if (!AppState.searchQuery) return true;
+    const q = AppState.searchQuery.toLowerCase();
+    return item.nome.toLowerCase().includes(q) || item.descricao.toLowerCase().includes(q);
+  });
+
+  // Ordenação
+  if (AppState.sortBy === "price-asc") {
+    list.sort((a, b) => a.preco - b.preco);
+  } else if (AppState.sortBy === "price-desc") {
+    list.sort((a, b) => b.preco - a.preco);
+  } else if (AppState.sortBy === "name-asc") {
+    list.sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+
+  AppState.filteredProducts = list;
+
+  // Atualizar contador
+  if (countLabel) {
+    countLabel.textContent = `${list.length} ${list.length === 1 ? "produto disponível" : "produtos disponíveis"}`;
+  }
+
+  // Estado Vazio
+  if (list.length === 0) {
+    grid.innerHTML = "";
+    grid.classList.add("hidden");
+    if (emptyState) emptyState.classList.remove("hidden");
+    return;
+  }
+
+  if (emptyState) emptyState.classList.add("hidden");
+  grid.classList.remove("hidden");
+
+  // Construir HTML dos Cards (Mobile-first, elegante com Tailwind CSS)
+  grid.innerHTML = list.map(product => {
+    // Requisito 4: Exibir apenas a PRIMEIRA imagem da lista no card principal
+    const firstImage = (product.imagens && product.imagens.length > 0) ? product.imagens[0] : PLACEHOLDER_IMAGE;
+    const totalImages = product.imagens ? product.imagens.length : 1;
+
+    return `
+      <div 
+        class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
+        data-id="${product.id}"
+      >
+        <!-- Imagem do Produto com clique para detalhes -->
+        <div 
+          class="relative aspect-square w-full bg-slate-100 overflow-hidden cursor-pointer js-open-details"
+          data-id="${product.id}"
+          title="Ver detalhes de ${product.nome}"
+        >
+          <img 
+            src="${firstImage}" 
+            alt="${product.nome}" 
+            loading="lazy"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE}';"
+          >
+
+          ${totalImages > 1 ? `
+            <span class="absolute bottom-2.5 right-2.5 bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              ${totalImages} fotos
+            </span>
+          ` : ""}
+        </div>
+
+        <!-- Conteúdo do Card -->
+        <div class="p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <!-- Nome do Produto (clicável para abrir modal) -->
+            <h3 
+              class="font-bold text-slate-900 text-base leading-snug line-clamp-2 hover:text-emerald-700 cursor-pointer transition-colors js-open-details"
+              data-id="${product.id}"
+              title="${product.nome}"
+            >
+              ${product.nome}
+            </h3>
+
+            <!-- Preço Formatado em BRL -->
+            <p class="mt-2 text-xl font-black text-emerald-600">
+              ${formatBRL(product.preco)}
+            </p>
+          </div>
+
+          <!-- Botão Adicionar ao Carrinho -->
+          <button 
+            type="button"
+            class="mt-4 w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all js-add-cart-btn"
+            data-id="${product.id}"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            Adicionar ao Carrinho
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Atrelar eventos aos elementos recém-renderizados
+  attachProductCardEvents();
+}
+
+/**
+ * Associa os listeners de evento aos cards de produto
+ */
+function attachProductCardEvents() {
+  // Abertura de modal via foto ou nome
+  document.querySelectorAll(".js-open-details").forEach(el => {
+    el.addEventListener("click", () => {
+      const prodId = el.getAttribute("data-id");
+      openProductModal(prodId);
+    });
+  });
+
+  // Botão Adicionar ao Carrinho
+  document.querySelectorAll(".js-add-cart-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const prodId = btn.getAttribute("data-id");
+      const product = AppState.products.find(p => p.id === prodId);
+      if (product) {
+        addToCart(product, 1);
+      }
+    });
+  });
+}
+
+// ==============================================================================
+// 7. MODAL DE DETALHES DO PRODUTO & CARROSSEL DE IMAGENS
+// ==============================================================================
+
+/**
+ * Abre o Modal com os dados do produto e inicializa a galeria/carrossel
+ * @param {string} productId
+ */
+function openProductModal(productId) {
+  const product = AppState.products.find(p => p.id === productId);
+  if (!product) return;
+
+  AppState.modalProduct = product;
+  AppState.activeImageIndex = 0;
+  AppState.modalQuantity = 1;
+  AppState.isProductModalOpen = true;
+
+  const modal = document.getElementById("productModal");
+  const modalName = document.getElementById("modalProductName");
+  const modalPrice = document.getElementById("modalProductPrice");
+  const modalDesc = document.getElementById("modalProductDescription");
+  const modalQtyVal = document.getElementById("modalQtyValue");
+
+  if (modalName) modalName.textContent = product.nome;
+  if (modalPrice) modalPrice.textContent = formatBRL(product.preco);
+  if (modalDesc) modalDesc.textContent = product.descricao || "Sem descrição disponível.";
+  if (modalQtyVal) modalQtyVal.textContent = "1";
+
+  // Atualizar carrossel de imagens
+  updateCarouselView();
+
+  if (modal) {
+    modal.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden"); // Bloqueia scroll de fundo
+  }
+}
+
+/**
+ * Fecha o modal de detalhes do produto
+ */
+function closeProductModal() {
+  const modal = document.getElementById("productModal");
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+  AppState.isProductModalOpen = false;
+  AppState.modalProduct = null;
+  if (!AppState.isCartOpen) {
+    document.body.classList.remove("overflow-hidden");
+  }
+}
+
+/**
+ * Atualiza o visual do carrossel no modal de detalhes
+ */
+function updateCarouselView() {
+  const product = AppState.modalProduct;
+  if (!product) return;
+
+  const images = (product.imagens && product.imagens.length > 0) ? product.imagens : [PLACEHOLDER_IMAGE];
+  const total = images.length;
+  const currentIdx = Math.max(0, Math.min(AppState.activeImageIndex, total - 1));
+  AppState.activeImageIndex = currentIdx;
+
+  const mainImg = document.getElementById("carouselMainImg");
+  const badge = document.getElementById("carouselBadge");
+  const prevBtn = document.getElementById("carouselPrevBtn");
+  const nextBtn = document.getElementById("carouselNextBtn");
+  const thumbnailsContainer = document.getElementById("carouselThumbnails");
+
+  // Imagem Principal
+  if (mainImg) {
+    mainImg.src = images[currentIdx];
+    mainImg.alt = `${product.nome} - Imagem ${currentIdx + 1}`;
+    mainImg.onerror = () => { mainImg.src = PLACEHOLDER_IMAGE; };
+  }
+
+  // Indicador
+  if (badge) {
+    badge.textContent = `${currentIdx + 1} / ${total}`;
+    badge.style.display = total > 1 ? "block" : "none";
+  }
+
+  // Controles de Navegação
+  if (prevBtn) prevBtn.style.display = total > 1 ? "flex" : "none";
+  if (nextBtn) nextBtn.style.display = total > 1 ? "flex" : "none";
+
+  // Miniaturas
+  if (thumbnailsContainer) {
+    if (total <= 1) {
+      thumbnailsContainer.innerHTML = "";
+    } else {
+      thumbnailsContainer.innerHTML = images.map((url, idx) => `
+        <button 
+          type="button"
+          class="w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${idx === currentIdx ? "border-emerald-600 scale-95 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}"
+          onclick="selectCarouselImage(${idx})"
+          aria-label="Ver imagem ${idx + 1}"
+        >
+          <img src="${url}" alt="Miniatura ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='${PLACEHOLDER_IMAGE}';">
+        </button>
+      `).join("");
+    }
+  }
+}
+
+/**
+ * Seleciona imagem diretamente pelas miniaturas
+ * @param {number} index
+ */
+window.selectCarouselImage = function(index) {
+  AppState.activeImageIndex = index;
+  updateCarouselView();
+};
+
+/**
+ * Navega para a imagem anterior
+ */
+function prevCarouselImage() {
+  if (!AppState.modalProduct || !AppState.modalProduct.imagens) return;
+  const total = AppState.modalProduct.imagens.length;
+  AppState.activeImageIndex = (AppState.activeImageIndex - 1 + total) % total;
+  updateCarouselView();
+}
+
+/**
+ * Navega para a próxima imagem
+ */
+function nextCarouselImage() {
+  if (!AppState.modalProduct || !AppState.modalProduct.imagens) return;
+  const total = AppState.modalProduct.imagens.length;
+  AppState.activeImageIndex = (AppState.activeImageIndex + 1) % total;
+  updateCarouselView();
+}
+
+// ==============================================================================
+// 8. MODAL DO CARRINHO DE COMPRAS
+// ==============================================================================
+
+/**
+ * Abre o Modal do Carrinho
+ */
+function openCartModal() {
+  AppState.isCartOpen = true;
+  renderCartModal();
+
+  const modal = document.getElementById("cartModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+  }
+}
+
+/**
+ * Fecha o Modal do Carrinho
+ */
+function closeCartModal() {
+  AppState.isCartOpen = false;
+  const modal = document.getElementById("cartModal");
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+  if (!AppState.isProductModalOpen) {
+    document.body.classList.remove("overflow-hidden");
+  }
+}
+
+/**
+ * Renderiza o conteúdo do modal do carrinho
+ */
+function renderCartModal() {
+  const container = document.getElementById("cartItemsList");
+  const emptyView = document.getElementById("emptyCartView");
+  const footer = document.getElementById("cartFooter");
+  const subtotalEl = document.getElementById("cartSubtotalValue");
+  const totalEl = document.getElementById("cartTotalValue");
+
+  if (!container) return;
+
+  if (AppState.cart.length === 0) {
+    container.innerHTML = "";
+    container.classList.add("hidden");
+    if (emptyView) emptyView.classList.remove("hidden");
+    if (footer) footer.classList.add("hidden");
+    return;
+  }
+
+  if (emptyView) emptyView.classList.add("hidden");
+  if (footer) footer.classList.remove("hidden");
+  container.classList.remove("hidden");
+
+  // Renderizar itens
+  container.innerHTML = AppState.cart.map(item => {
+    const itemTotal = item.product.preco * item.quantity;
+
+    return `
+      <div class="py-4 flex gap-4 items-center justify-between">
+        <!-- Foto miniatura -->
+        <img 
+          src="${item.product.imagem || PLACEHOLDER_IMAGE}" 
+          alt="${item.product.nome}" 
+          class="w-16 h-16 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+          onerror="this.src='${PLACEHOLDER_IMAGE}';"
+        >
+
+        <!-- Informações e Quantidade -->
+        <div class="flex-1 min-w-0">
+          <h4 class="text-sm font-bold text-slate-800 truncate" title="${item.product.nome}">
+            ${item.product.nome}
+          </h4>
+          <p class="text-xs text-slate-500 mt-0.5">
+            ${formatBRL(item.product.preco)} cada
+          </p>
+
+          <!-- Controles de Quantidade -->
+          <div class="flex items-center gap-2 mt-2">
+            <button 
+              type="button"
+              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors"
+              onclick="updateCartItemQty('${item.product.id}', -1)"
+              aria-label="Diminuir quantidade"
+            >-</button>
+            <span class="text-xs font-bold text-slate-900 w-5 text-center">${item.quantity}</span>
+            <button 
+              type="button"
+              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors"
+              onclick="updateCartItemQty('${item.product.id}', 1)"
+              aria-label="Aumentar quantidade"
+            >+</button>
+          </div>
+        </div>
+
+        <!-- Preço e Botão Remover -->
+        <div class="text-right flex flex-col items-end justify-between self-stretch">
+          <button 
+            type="button" 
+            class="text-slate-400 hover:text-red-500 transition-colors p-1"
+            onclick="removeCartItem('${item.product.id}')"
+            title="Remover produto"
+            aria-label="Remover produto"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+          <span class="text-sm font-black text-slate-900">
+            ${formatBRL(itemTotal)}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Atualizar totais
+  const grandTotal = getCartTotal();
+  if (subtotalEl) subtotalEl.textContent = formatBRL(grandTotal);
+  if (totalEl) totalEl.textContent = formatBRL(grandTotal);
+}
+
+// Helpers globais para eventos inline do carrinho
+window.updateCartItemQty = function(id, delta) {
+  updateItemQuantity(id, delta);
+};
+
+window.removeCartItem = function(id) {
+  removeFromCart(id);
+};
+
+// ==============================================================================
+// 9. CHECKOUT VIA WHATSAPP (MENSAGEM ENCODADA)
+// ==============================================================================
+
+/**
+ * Lê o estado do carrinho, monta a mensagem do pedido formatada
+ * e redireciona o usuário para o link wa.me
+ */
+function checkoutViaWhatsApp() {
+  if (AppState.cart.length === 0) {
+    showToast("Seu carrinho está vazio!");
+    return;
+  }
+
+  // 1. Limpeza do número de telefone (apenas números)
+  const cleanPhone = WHATSAPP_PHONE_NUMBER.replace(/\D/g, "");
+
+  // 2. Montagem dos itens do pedido
+  const itensFormatados = AppState.cart.map(item => {
+    const itemSubtotal = formatBRL(item.product.preco * item.quantity);
+    return `• ${item.quantity}x ${item.product.nome} (${formatBRL(item.product.preco)}) = ${itemSubtotal}`;
+  }).join("\n");
+
+  const totalFormatado = formatBRL(getCartTotal());
+
+  // 3. Montagem da mensagem final
+  const mensagem = [
+    "Olá! Gostaria de fazer o seguinte pedido pelo catálogo:",
+    "",
+    itensFormatados,
+    "",
+    `*Total do Pedido: ${totalFormatado}*`,
+    "",
+    "Poderia me informar o valor do frete e os prazos de entrega?"
+  ].join("\n");
+
+  // 4. Codificação da URL
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(mensagem)}`;
+
+  // 5. Redirecionamento
+  window.open(whatsappUrl, "_blank");
+}
+
+// ==============================================================================
+// 10. INICIALIZAÇÃO DE EVENTOS & CICLO DE VIDA (DOM READY)
+// ==============================================================================
+
+function setupEventListeners() {
+  // 1. Botões de abertura do carrinho
+  const cartHeaderBtn = document.getElementById("cartHeaderBtn");
+  const cartFloatingBtn = document.getElementById("cartFloatingBtn");
+  const closeCartBtn = document.getElementById("closeCartModalBtn");
+  const continueShoppingBtn = document.getElementById("continueShoppingBtn");
+
+  if (cartHeaderBtn) cartHeaderBtn.addEventListener("click", openCartModal);
+  if (cartFloatingBtn) cartFloatingBtn.addEventListener("click", openCartModal);
+  if (closeCartBtn) closeCartBtn.addEventListener("click", closeCartModal);
+  if (continueShoppingBtn) continueShoppingBtn.addEventListener("click", closeCartModal);
+
+  // 2. Fechamento de modal ao clicar no backdrop escuro
+  const cartModal = document.getElementById("cartModal");
+  if (cartModal) {
+    cartModal.addEventListener("click", (e) => {
+      if (e.target === cartModal) closeCartModal();
+    });
+  }
+
+  const productModal = document.getElementById("productModal");
+  if (productModal) {
+    productModal.addEventListener("click", (e) => {
+      if (e.target === productModal) closeProductModal();
+    });
+  }
+
+  // 3. Botão de fechar modal de produto
+  const closeProductModalBtn = document.getElementById("closeProductModalBtn");
+  if (closeProductModalBtn) {
+    closeProductModalBtn.addEventListener("click", closeProductModal);
+  }
+
+  // 4. Controles do Carrossel
+  const carouselPrevBtn = document.getElementById("carouselPrevBtn");
+  const carouselNextBtn = document.getElementById("carouselNextBtn");
+  if (carouselPrevBtn) carouselPrevBtn.addEventListener("click", prevCarouselImage);
+  if (carouselNextBtn) carouselNextBtn.addEventListener("click", nextCarouselImage);
+
+  // 5. Quantidade dentro do modal de produto
+  const modalQtyMinus = document.getElementById("modalQtyMinus");
+  const modalQtyPlus = document.getElementById("modalQtyPlus");
+  const modalQtyVal = document.getElementById("modalQtyValue");
+  const modalAddToCartBtn = document.getElementById("modalAddToCartBtn");
+
+  if (modalQtyMinus) {
+    modalQtyMinus.addEventListener("click", () => {
+      if (AppState.modalQuantity > 1) {
+        AppState.modalQuantity--;
+        if (modalQtyVal) modalQtyVal.textContent = AppState.modalQuantity;
+      }
+    });
+  }
+
+  if (modalQtyPlus) {
+    modalQtyPlus.addEventListener("click", () => {
+      AppState.modalQuantity++;
+      if (modalQtyVal) modalQtyVal.textContent = AppState.modalQuantity;
+    });
+  }
+
+  if (modalAddToCartBtn) {
+    modalAddToCartBtn.addEventListener("click", () => {
+      if (AppState.modalProduct) {
+        addToCart(AppState.modalProduct, AppState.modalQuantity);
+        closeProductModal();
+      }
+    });
+  }
+
+  // 6. Botão de Checkout via WhatsApp
+  const whatsappBtn = document.getElementById("whatsappCheckoutBtn");
+  if (whatsappBtn) {
+    whatsappBtn.addEventListener("click", checkoutViaWhatsApp);
+  }
+
+  // 7. Campo de Busca (Desktop & Mobile)
+  const searchInput = document.getElementById("searchInput");
+  const searchMobileInput = document.getElementById("searchMobileInput");
+  const resetSearchBtn = document.getElementById("resetSearchBtn");
+
+  const handleSearch = (val) => {
+    AppState.searchQuery = val.trim();
+    if (searchInput) searchInput.value = val;
+    if (searchMobileInput) searchMobileInput.value = val;
+    renderProducts();
+  };
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => handleSearch(e.target.value));
+  }
+  if (searchMobileInput) {
+    searchMobileInput.addEventListener("input", (e) => handleSearch(e.target.value));
+  }
+  if (resetSearchBtn) {
+    resetSearchBtn.addEventListener("click", () => handleSearch(""));
+  }
+
+  // 8. Seletor de Ordenação
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", (e) => {
+      AppState.sortBy = e.target.value;
+      renderProducts();
+    });
+  }
+
+  // 9. Botão de Tentar Novamente no Erro
+  const retryBtn = document.getElementById("retryBtn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", fetchProductsFromSheets);
+  }
+
+  // 10. Atalhos de Teclado (ESC fecha modais, Setas navegam fotos)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (AppState.isProductModalOpen) closeProductModal();
+      if (AppState.isCartOpen) closeCartModal();
+    } else if (AppState.isProductModalOpen) {
+      if (e.key === "ArrowLeft") prevCarouselImage();
+      if (e.key === "ArrowRight") nextCarouselImage();
+    }
+  });
+
+  // 11. Ano atual no rodapé
+  const yearEl = document.getElementById("currentYear");
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear();
+  }
+}
+
+// ==============================================================================
+// 11. BOOTSTRAP DA APLICAÇÃO
+// ==============================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Registrar event listeners
+  setupEventListeners();
+
+  // 2. Carregar carrinho persistido no LocalStorage
+  loadCartFromStorage();
+
+  // 3. Buscar catálogo no Google Sheets
+  fetchProductsFromSheets();
+});
