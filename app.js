@@ -362,7 +362,7 @@ function splitImageUrls(imagensField) {
   const urls = imagensField
     .split(",")
     .map(url => url.trim())
-    .filter(url => url.length > 0 && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")));
+    .filter(url => url.length > 0);
 
   return urls.length > 0 ? urls : [PLACEHOLDER_IMAGE];
 }
