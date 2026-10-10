@@ -126,6 +126,7 @@ const AppState = {
   activeImageIndex: 0,
   modalQuantity: 1,
   searchQuery: "",
+  selectedCategory: "all",
   sortBy: "default",
   isCartOpen: false,
   isProductModalOpen: false
@@ -367,6 +368,39 @@ function splitImageUrls(imagensField) {
 }
 
 /**
+ * Inicializa os produtos da aplicação.
+ * Prioriza a lista PRODUCTS definida em products.js (fácil de editar diretamente no código).
+ * Se GOOGLE_SHEETS_CSV_URL estiver configurada, busca dinamicamente da planilha.
+ */
+async function loadProductsData() {
+  const skeleton = document.getElementById("loadingSkeleton");
+  const grid = document.getElementById("productsGrid");
+
+  // 1. Catálogo local direto no código (products.js)
+  if (typeof PRODUCTS !== "undefined" && Array.isArray(PRODUCTS) && PRODUCTS.length > 0 && (!GOOGLE_SHEETS_CSV_URL || GOOGLE_SHEETS_CSV_URL.trim() === "")) {
+    AppState.products = PRODUCTS;
+    AppState.filteredProducts = [...PRODUCTS];
+    if (skeleton) skeleton.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    renderProducts();
+    return;
+  }
+
+  // 2. Se houver URL do Google Sheets configurada, busca da planilha
+  if (GOOGLE_SHEETS_CSV_URL && GOOGLE_SHEETS_CSV_URL.trim() !== "") {
+    await fetchProductsFromSheets();
+    return;
+  }
+
+  // 3. Fallback
+  AppState.products = (typeof PRODUCTS !== "undefined" && PRODUCTS.length > 0) ? PRODUCTS : DEMO_PRODUCTS;
+  AppState.filteredProducts = [...AppState.products];
+  if (skeleton) skeleton.classList.add("hidden");
+  if (grid) grid.classList.remove("hidden");
+  renderProducts();
+}
+
+/**
  * Faz o fetch do CSV e popula o AppState.products
  */
 async function fetchProductsFromSheets() {
@@ -375,10 +409,9 @@ async function fetchProductsFromSheets() {
   const errorState = document.getElementById("errorState");
   const emptyState = document.getElementById("emptyState");
 
-  // Se o usuário não configurou a URL ou ela for vazia, usamos os dados de exemplo
+  // Se o usuário não configurou a URL ou ela for vazia, usamos os produtos em código
   if (!GOOGLE_SHEETS_CSV_URL || GOOGLE_SHEETS_CSV_URL.trim() === "") {
-    console.warn("GOOGLE_SHEETS_CSV_URL não configurada. Carregando catálogo demonstrativo de fallback...");
-    AppState.products = DEMO_PRODUCTS;
+    AppState.products = (typeof PRODUCTS !== "undefined" && PRODUCTS.length > 0) ? PRODUCTS : DEMO_PRODUCTS;
     AppState.filteredProducts = [...AppState.products];
     renderProducts();
     if (skeleton) skeleton.classList.add("hidden");
@@ -411,6 +444,7 @@ async function fetchProductsFromSheets() {
     const descIdx = headerRow.findIndex(h => h === "descricao" || h === "descrição");
     const precoIdx = headerRow.findIndex(h => h === "preco" || h === "preço" || h === "valor");
     const imagensIdx = headerRow.findIndex(h => h === "imagens" || h === "imagem" || h === "fotos");
+    const catIdx = headerRow.findIndex(h => h === "categoria" || h === "tipo");
 
     if (nomeIdx === -1 || precoIdx === -1) {
       throw new Error("Cabeçalho inválido no CSV. Certifique-se de ter as colunas: id, nome, descricao, preco, imagens.");
@@ -427,11 +461,13 @@ async function fetchProductsFromSheets() {
       const descricao = (descIdx !== -1 && row[descIdx]) ? row[descIdx].trim() : "Sem descrição detalhada.";
       const preco = parsePrice(row[precoIdx]);
       const rawImagens = (imagensIdx !== -1 && row[imagensIdx]) ? row[imagensIdx] : "";
+      const categoria = (catIdx !== -1 && row[catIdx]) ? row[catIdx].trim() : "Geral";
       const imagens = splitImageUrls(rawImagens);
 
       products.push({
         id: rawId,
         nome,
+        categoria,
         descricao,
         preco,
         imagens
@@ -447,18 +483,12 @@ async function fetchProductsFromSheets() {
 
   } catch (error) {
     console.error("Falha ao obter produtos via Google Sheets:", error);
-    
-    // Fallback gracioso com dados de demonstração
-    console.info("Ativando produtos demonstrativos para permitir a navegação do usuário.");
-    AppState.products = DEMO_PRODUCTS;
+    AppState.products = (typeof PRODUCTS !== "undefined" && PRODUCTS.length > 0) ? PRODUCTS : DEMO_PRODUCTS;
     AppState.filteredProducts = [...AppState.products];
 
     if (skeleton) skeleton.classList.add("hidden");
     if (grid) grid.classList.remove("hidden");
     renderProducts();
-
-    // Notifica visualmente que está em modo de fallback
-    showToast("Exibindo produtos de teste. Conecte sua planilha Google Sheets.");
   }
 }
 
@@ -476,11 +506,20 @@ function renderProducts() {
 
   if (!grid) return;
 
-  // Filtragem por busca
+  // Filtragem por busca e categoria
   let list = AppState.products.filter(item => {
+    // Filtro por Categoria
+    if (AppState.selectedCategory && AppState.selectedCategory !== "all") {
+      if (item.categoria !== AppState.selectedCategory) return false;
+    }
+
+    // Filtro por Busca de Texto
     if (!AppState.searchQuery) return true;
     const q = AppState.searchQuery.toLowerCase();
-    return item.nome.toLowerCase().includes(q) || item.descricao.toLowerCase().includes(q);
+    const nomeMatches = item.nome && item.nome.toLowerCase().includes(q);
+    const descMatches = item.descricao && item.descricao.toLowerCase().includes(q);
+    const catMatches = item.categoria && item.categoria.toLowerCase().includes(q);
+    return nomeMatches || descMatches || catMatches;
   });
 
   // Ordenação
@@ -512,7 +551,6 @@ function renderProducts() {
 
   // Construir HTML dos Cards (Mobile-first, elegante com Tailwind CSS)
   grid.innerHTML = list.map(product => {
-    // Requisito 4: Exibir apenas a PRIMEIRA imagem da lista no card principal
     const firstImage = (product.imagens && product.imagens.length > 0) ? product.imagens[0] : PLACEHOLDER_IMAGE;
     const totalImages = product.imagens ? product.imagens.length : 1;
 
@@ -534,6 +572,12 @@ function renderProducts() {
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE}';"
           >
+
+          ${product.categoria ? `
+            <span class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              ${product.categoria}
+            </span>
+          ` : ""}
 
           ${totalImages > 1 ? `
             <span class="absolute bottom-2.5 right-2.5 bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -999,7 +1043,26 @@ function setupEventListeners() {
     whatsappBtn.addEventListener("click", checkoutViaWhatsApp);
   }
 
-  // 7. Campo de Busca (Desktop & Mobile)
+  // 7. Filtro por Categorias (Pills)
+  const categoryBtns = document.querySelectorAll(".category-btn");
+  categoryBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cat = btn.getAttribute("data-category") || "all";
+      AppState.selectedCategory = cat;
+
+      categoryBtns.forEach(b => {
+        if (b === btn) {
+          b.className = "category-btn active px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-sm";
+        } else {
+          b.className = "category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+        }
+      });
+
+      renderProducts();
+    });
+  });
+
+  // 8. Campo de Busca (Desktop & Mobile)
   const searchInput = document.getElementById("searchInput");
   const searchMobileInput = document.getElementById("searchMobileInput");
   const resetSearchBtn = document.getElementById("resetSearchBtn");
@@ -1018,10 +1081,22 @@ function setupEventListeners() {
     searchMobileInput.addEventListener("input", (e) => handleSearch(e.target.value));
   }
   if (resetSearchBtn) {
-    resetSearchBtn.addEventListener("click", () => handleSearch(""));
+    resetSearchBtn.addEventListener("click", () => {
+      handleSearch("");
+      // Reset categoria também
+      AppState.selectedCategory = "all";
+      categoryBtns.forEach(b => {
+        if (b.getAttribute("data-category") === "all") {
+          b.className = "category-btn active px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-sm";
+        } else {
+          b.className = "category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+        }
+      });
+      renderProducts();
+    });
   }
 
-  // 8. Seletor de Ordenação
+  // 9. Seletor de Ordenação
   const sortSelect = document.getElementById("sortSelect");
   if (sortSelect) {
     sortSelect.addEventListener("change", (e) => {
@@ -1030,13 +1105,13 @@ function setupEventListeners() {
     });
   }
 
-  // 9. Botão de Tentar Novamente no Erro
+  // 10. Botão de Tentar Novamente no Erro
   const retryBtn = document.getElementById("retryBtn");
   if (retryBtn) {
-    retryBtn.addEventListener("click", fetchProductsFromSheets);
+    retryBtn.addEventListener("click", loadProductsData);
   }
 
-  // 10. Atalhos de Teclado (ESC fecha modais, Setas navegam fotos)
+  // 11. Atalhos de Teclado (ESC fecha modais, Setas navegam fotos)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (AppState.isProductModalOpen) closeProductModal();
@@ -1047,7 +1122,7 @@ function setupEventListeners() {
     }
   });
 
-  // 11. Ano atual no rodapé
+  // 12. Ano atual no rodapé
   const yearEl = document.getElementById("currentYear");
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear();
@@ -1065,6 +1140,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Carregar carrinho persistido no LocalStorage
   loadCartFromStorage();
 
-  // 3. Buscar catálogo no Google Sheets
-  fetchProductsFromSheets();
+  // 3. Inicializar catálogo de produtos
+  loadProductsData();
 });

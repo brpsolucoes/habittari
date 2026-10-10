@@ -25,38 +25,37 @@ O catálogo é sincronizado dinamicamente com uma planilha pública do **Google 
 ```text
 habittari/
 ├── index.html     # Estrutura semântica, layout e Tailwind CSS CDN
-├── app.js         # Lógica da aplicação, parser CSV, estado, carrinho e WhatsApp
+├── products.js    # Banco de dados de produtos (edite ou adicione itens aqui!)
+├── app.js         # Lógica do carrinho, carrossel, filtros e checkout WhatsApp
 ├── style.css      # Estilizações finas, animações de modal e utilitários
 └── README.md      # Documentação e instruções de configuração
 ```
 
 ---
 
-## ⚙️ Configuração Rápida
+## 🛍️ Como Cadastrar ou Editar Produtos
 
-Abra o arquivo [`app.js`](file:///home/bruno/dev/pessoal/habittari/app.js) e ajuste as duas constantes principais no início do código:
+Os produtos estão organizados de forma limpa e comentada no arquivo [`products.js`](file:///home/bruno/dev/pessoal/habittari/products.js).
+
+Para adicionar um produto, basta inserir um novo objeto na lista:
 
 ```javascript
-// 1. URL do CSV público da sua planilha Google
-const GOOGLE_SHEETS_CSV_URL = "SUA_URL_DO_CSV_AQUI"; 
-
-// 2. Número de WhatsApp comercial com DDD (somente dígitos)
-const WHATSAPP_PHONE_NUMBER = "5511999999999";
+{
+  id: "prod-13",
+  nome: "Nome do Produto",
+  categoria: "Móveis", // ou "Iluminação", "Decoração", "Têxtil"
+  preco: 450.00,
+  descricao: "Descrição completa com medidas e materiais...",
+  imagens: [
+    "https://link-da-foto-capa.jpg",
+    "https://link-da-foto-detalhe.jpg"
+  ]
+}
 ```
 
----
-
-## 📊 Como Configurar sua Planilha no Google Sheets
-
-### 1. Estrutura das Colunas
-Crie uma planilha no Google Sheets com o cabeçalho exatamente nesta ordem na **primeira linha**:
-
-| id | nome | descricao | preco | imagens |
-| :--- | :--- | :--- | :--- | :--- |
-| `p1` | Poltrona Bouclé | Poltrona ergonômica em tecido bouclé | `1290,00` | `https://site.com/img1.jpg, https://site.com/img2.jpg` |
-| `p2` | Mesa de Centro | Mesa em aço carbono e mármore | `840,50` | `https://site.com/foto1.png` |
-
-> **Dica:** Na coluna `imagens`, separe as URLs por vírgula `,`. O JavaScript dividirá as fotos automaticamente e criará o carrossel no modal de detalhes.
+- **Primeira foto:** Exibida no card principal do catálogo.
+- **Demais fotos:** Formam o carrossel interativo do modal de detalhes.
+- **Categorias:** Geram automaticamente as abas de filtro na parte superior do catálogo.
 
 ### 2. Publicar a Planilha como CSV
 1. No menu superior da planilha, clique em **Arquivo** > **Compartilhar** > **Publicar na Web**.
