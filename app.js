@@ -35,7 +35,7 @@ const GOOGLE_SHEETS_CSV_URL = "";
  * Número do WhatsApp para recebimento dos pedidos (DDI + DDD + Telefone, apenas números).
  * Exemplo para Brasil (SP): 5511999999999
  */
-const WHATSAPP_PHONE_NUMBER = "5511999999999";
+const WHATSAPP_PHONE_NUMBER = "5511964729650";
 
 /**
  * Chave de armazenamento no LocalStorage para o carrinho
