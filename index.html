@@ -150,23 +150,9 @@
       </div>
     </div>
 
-    <!-- Barra de Filtro de Categorias (Pills) -->
-    <div id="categoryFilters" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
-      <button class="category-btn active px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-sm" data-category="all">
-        Todos os Itens
-      </button>
-      <button class="category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200" data-category="Móveis">
-        Móveis
-      </button>
-      <button class="category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200" data-category="Iluminação">
-        Iluminação
-      </button>
-      <button class="category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200" data-category="Decoração">
-        Decoração
-      </button>
-      <button class="category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200" data-category="Têxtil">
-        Têxtil
-      </button>
+    <!-- Barra de Filtro de Categorias Dinâmica -->
+    <div id="categoryFilters" class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar hidden">
+      <!-- Injetado dinamicamente via JS se houver mais de uma categoria -->
     </div>
 
     <!-- Feedback de Carregamento (Skeleton Loaders) -->

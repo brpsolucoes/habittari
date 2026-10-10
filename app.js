@@ -54,62 +54,14 @@ const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1555041469-a586c61e
  */
 const DEMO_PRODUCTS = [
   {
-    id: "prod-1",
-    nome: "Poltrona Nórdica Bouclé",
-    descricao: "Design escandinavo com revestimento em tecido bouclé de alta gramatura e pés em madeira maciça de carvalho. Perfeita para salas de estar elegantes e cantos de leitura aconchegantes.",
-    preco: 1290.00,
+    id: "rolinha-esqueceram-de-mim",
+    nome: "Rolinha da Amizade (Esqueceram de Mim)",
+    categoria: "Decoração",
+    preco: 12.90,
+    descricao: "Inspirada no clássico 'Esqueceram de Mim', um símbolo afetivo de união e lealdade para presentear ou decorar com significado.\n\n\"Enquanto cada um de nós tiver a sua rolinha, seremos amigos para sempre.\"\n\n• Produto Voolt\n• Fabricação: Impresso em 3D com alta precisão\n• Material: PLA ecológico e resistente\n• Cor: Branco Off-white",
     imagens: [
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1580481077195-c22ae0062a4b?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=80"
-    ]
-  },
-  {
-    id: "prod-2",
-    nome: "Mesa de Centro Minimalista",
-    descricao: "Estrutura geométrica em aço carbono com pintura eletrostática preta fosca e tampo duplo em mármore sintético branco carrara. Durabilidade e sofisticação atemporal.",
-    preco: 840.50,
-    imagens: [
-      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=900&q=80"
-    ]
-  },
-  {
-    id: "prod-3",
-    nome: "Luminária de Piso Industrial Arco",
-    descricao: "Luminária de piso contemporânea com base sólida em pedra sabão e cúpula articulada em latão escovado. Compatível com lâmpadas inteligentes E27.",
-    preco: 499.90,
-    imagens: [
-      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=80"
-    ]
-  },
-  {
-    id: "prod-4",
-    nome: "Vaso de Cerâmica Terracota Artesanal",
-    descricao: "Peça modelada manualmente com argila natural e acabamento rústico impermeabilizado. Ideal para folhagens secas, eucalipto ou arranjos florais minimalistas.",
-    preco: 145.00,
-    imagens: [
-      "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=900&q=80"
-    ]
-  },
-  {
-    id: "prod-5",
-    nome: "Espelho Orgânico com Moldura em Carvalho",
-    descricao: "Espelho lapidado com linhas fluidas e assimétricas. Moldura artesanal em lâmina de madeira nobre com suporte duplo para instalação vertical ou horizontal.",
-    preco: 620.00,
-    imagens: [
-      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=80"
-    ]
-  },
-  {
-    id: "prod-6",
-    nome: "Manta 100% Algodão com Franjas",
-    descricao: "Trama macia em tear manual com fios selecionados de algodão puro. Proporciona textura tátil e sensação de conforto para sofás e camas.",
-    preco: 189.90,
-    imagens: [
-      "https://images.unsplash.com/photo-1606744837616-56c9a5c6a6eb?auto=format&fit=crop&w=900&q=80"
+      "assets/img/products/rolinha-esqueceram-de-mim/rolinha%20capa.jpeg",
+      "assets/img/products/rolinha-esqueceram-de-mim/rolinha%2001.jpeg"
     ]
   }
 ];
@@ -382,6 +334,7 @@ async function loadProductsData() {
     AppState.filteredProducts = [...PRODUCTS];
     if (skeleton) skeleton.classList.add("hidden");
     if (grid) grid.classList.remove("hidden");
+    renderCategoryFilters();
     renderProducts();
     return;
   }
@@ -397,6 +350,7 @@ async function loadProductsData() {
   AppState.filteredProducts = [...AppState.products];
   if (skeleton) skeleton.classList.add("hidden");
   if (grid) grid.classList.remove("hidden");
+  renderCategoryFilters();
   renderProducts();
 }
 
@@ -493,8 +447,44 @@ async function fetchProductsFromSheets() {
 }
 
 // ==============================================================================
-// 6. RENDERIZAÇÃO DA INTERFACE PRINCIPAL (GRID DE PRODUTOS)
+// 6. RENDERIZAÇÃO DA INTERFACE PRINCIPAL (GRID DE PRODUTOS & CATEGORIAS)
 // ==============================================================================
+
+/**
+ * Renderiza dinamicamente as pílulas de categoria se houver mais de uma categoria cadastrada.
+ * Caso haja apenas 1 categoria (ou nenhuma), oculta a barra para manter o visual limpo e focado.
+ */
+function renderCategoryFilters() {
+  const container = document.getElementById("categoryFilters");
+  if (!container) return;
+
+  const categories = [...new Set(AppState.products.map(p => p.categoria).filter(Boolean))];
+
+  // Se houver 1 ou nenhuma categoria, esconde as pílulas para não poluir
+  if (categories.length <= 1) {
+    container.innerHTML = "";
+    container.classList.add("hidden");
+    return;
+  }
+
+  container.classList.remove("hidden");
+  container.innerHTML = [
+    `<button class="category-btn ${AppState.selectedCategory === 'all' ? 'active bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'} px-4 py-2 rounded-full text-xs font-bold transition-all" data-category="all">Todos os Itens</button>`,
+    ...categories.map(cat => `
+      <button class="category-btn ${AppState.selectedCategory === cat ? 'active bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'} px-4 py-2 rounded-full text-xs font-bold transition-all" data-category="${cat}">
+        ${cat}
+      </button>
+    `)
+  ].join("");
+
+  container.querySelectorAll(".category-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      AppState.selectedCategory = btn.getAttribute("data-category") || "all";
+      renderCategoryFilters();
+      renderProducts();
+    });
+  });
+}
 
 /**
  * Renderiza o grid de produtos
@@ -1043,26 +1033,7 @@ function setupEventListeners() {
     whatsappBtn.addEventListener("click", checkoutViaWhatsApp);
   }
 
-  // 7. Filtro por Categorias (Pills)
-  const categoryBtns = document.querySelectorAll(".category-btn");
-  categoryBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const cat = btn.getAttribute("data-category") || "all";
-      AppState.selectedCategory = cat;
-
-      categoryBtns.forEach(b => {
-        if (b === btn) {
-          b.className = "category-btn active px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-sm";
-        } else {
-          b.className = "category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
-        }
-      });
-
-      renderProducts();
-    });
-  });
-
-  // 8. Campo de Busca (Desktop & Mobile)
+  // 7. Campo de Busca (Desktop & Mobile)
   const searchInput = document.getElementById("searchInput");
   const searchMobileInput = document.getElementById("searchMobileInput");
   const resetSearchBtn = document.getElementById("resetSearchBtn");
@@ -1083,15 +1054,8 @@ function setupEventListeners() {
   if (resetSearchBtn) {
     resetSearchBtn.addEventListener("click", () => {
       handleSearch("");
-      // Reset categoria também
       AppState.selectedCategory = "all";
-      categoryBtns.forEach(b => {
-        if (b.getAttribute("data-category") === "all") {
-          b.className = "category-btn active px-4 py-2 rounded-full text-xs font-bold transition-all bg-slate-900 text-white shadow-sm";
-        } else {
-          b.className = "category-btn px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
-        }
-      });
+      renderCategoryFilters();
       renderProducts();
     });
   }
