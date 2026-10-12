@@ -1,18 +1,49 @@
-/* Estilos adicionais e utilitários complementares ao Tailwind CSS */
+/* ==========================================================================
+   HABITTARI - ESTILOS E REFINAMENTOS VISUAIS
+   Tema: Natal Afetivo & Manufatura em Impressão 3D Delicada
+   ========================================================================== */
 
-/* Animações suaves para modais e toasters */
-@keyframes fadeIn {
+/* --------------------------------------------------------------------------
+   1. Tipografia e Fontes Globais
+   -------------------------------------------------------------------------- */
+.font-serif-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-sans-ui {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   2. Fundo Verde Escuro Festivo (Inspirado no demo Jingle Bells)
+   -------------------------------------------------------------------------- */
+.bg-festive-dark {
+  background: radial-gradient(ellipse at 50% 15%, #113D2B 0%, #082016 55%, #05150E 100%);
+}
+
+.glow-festive-gold {
+  box-shadow: 0 10px 40px -10px rgba(201, 151, 66, 0.3);
+}
+
+.glow-festive-green {
+  box-shadow: 0 20px 50px -15px rgba(17, 61, 43, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   3. Animações e Transições Suaves
+   -------------------------------------------------------------------------- */
+@keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.97) translateY(8px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes slideUp {
+@keyframes slideUpFade {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -23,24 +54,135 @@
   }
 }
 
+@keyframes gentlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.9;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15) rotate(10deg); }
+}
+
 .modal-enter {
-  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInScale 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .toast-enter {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Ocultar barra de rolagem mantendo funcionalidade */
+.sparkle-anim {
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.sparkle-anim-delayed {
+  animation: sparkle 3.6s ease-in-out 1.2s infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(8deg);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(-8deg);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 7.5s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: floatSlow 4.5s ease-in-out 1s infinite;
+}
+
+/* --------------------------------------------------------------------------
+   4. Efeito de Flocos de Neve Delicados (Subtle Holiday Snow)
+   -------------------------------------------------------------------------- */
+#snowCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.75;
+  transition: opacity 0.4s ease;
+}
+
+#snowCanvas.snow-disabled {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. Sombras & Efeitos de Vidro e Ouro Suave
+   -------------------------------------------------------------------------- */
+.shadow-festive-card {
+  box-shadow: 0 4px 20px -2px rgba(22, 56, 43, 0.05),
+              0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.shadow-festive-card:hover {
+  box-shadow: 0 16px 32px -4px rgba(22, 56, 43, 0.1),
+              0 6px 12px -2px rgba(200, 151, 66, 0.08);
+}
+
+.gold-border-glow {
+  position: relative;
+}
+
+.gold-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(201, 151, 66, 0.3), transparent, rgba(35, 83, 62, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. Utilitários Gerais
+   -------------------------------------------------------------------------- */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Tratamento de transições suaves */
 .transition-smooth {
-  transition: all 0.25s ease-in-out;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Badge de filamento com micro gradiente */
+.badge-3d {
+  background: linear-gradient(135deg, #F2F7F4 0%, #FAF3E7 100%);
+  border: 1px solid rgba(201, 151, 66, 0.25);
 }

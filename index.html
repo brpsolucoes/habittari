@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Habittari | Catálogo Digital</title>
+  <title>Habittari | Natal & Impressão 3D Afetiva</title>
   
   <!-- Favicon -->
   <link rel="icon" type="image/webp" href="assets/img/logo-.webp">
   <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="apple-touch-icon" href="assets/img/logo-.webp">
   
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts: Playfair Display + Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,17 +22,44 @@
       theme: {
         extend: {
           fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
           },
           colors: {
-            brand: {
-              50: '#f6f7f9',
-              100: '#eceff3',
-              500: '#1e293b',
-              600: '#0f172a',
-              700: '#020617',
-              accent: '#10b981',
-              'accent-hover': '#059669',
+            pine: {
+              50: '#f2f7f4',
+              100: '#e3eee7',
+              200: '#c5ded0',
+              300: '#9ec4b0',
+              500: '#23533e',
+              600: '#1a4130',
+              700: '#143426',
+              800: '#0f291e',
+              900: '#0a2318',
+              950: '#06170f',
+            },
+            gold: {
+              50: '#fcf9f2',
+              100: '#f9f1df',
+              200: '#f2e1bd',
+              300: '#e8c986',
+              400: '#d9aa58',
+              500: '#c99742',
+              600: '#af7e32',
+              700: '#8e6224',
+            },
+            warm: {
+              50: '#fbf9f5',
+              100: '#f6f3eb',
+              200: '#eee9dd',
+              300: '#ded6c3',
+            },
+            berry: {
+              50: '#fdf2f3',
+              100: '#fbe4e6',
+              500: '#c43343',
+              600: '#a62b35',
+              700: '#881f28',
             }
           }
         }
@@ -43,24 +70,57 @@
   <!-- Estilos Customizados -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+<body class="bg-warm-50/40 text-stone-800 font-sans antialiased min-h-screen flex flex-col selection:bg-gold-500 selection:text-white relative">
+
+  <!-- Canvas interativo para partículas suaves de neve -->
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
 
   <!-- ========================================================================= -->
-  <!-- HEADER & NAVEGAÇÃO                                                        -->
+  <!-- BARRA DE AVISO SUPERIOR (VERDE ESCURO FESTIVO)                            -->
   <!-- ========================================================================= -->
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-shadow">
+  <div class="bg-pine-950 text-emerald-100 text-xs py-2 px-4 border-b border-emerald-900/60 relative z-30">
+    <div class="max-w-7xl mx-auto flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-3">
+      <div class="flex items-center gap-2 text-center sm:text-left">
+        <span class="text-gold-300 sparkle-anim text-sm">✦</span>
+        <span class="font-medium tracking-wide">
+          Edição Especial de Natal: Peças exclusivas em <strong class="text-gold-300 font-semibold">Impressão 3D Afetiva</strong>
+        </span>
+        <span class="hidden md:inline text-emerald-300/80">• Encomende com antecedência para o fim de ano</span>
+      </div>
+
+      <!-- Seletor / Botão de Intensidade da Neve -->
+      <button 
+        id="toggleSnowBtn" 
+        class="inline-flex items-center gap-1.5 text-[11px] text-emerald-100 hover:text-white bg-pine-900/90 hover:bg-pine-800 px-3 py-1 rounded-full transition-all border border-emerald-700/60 cursor-pointer shadow-xs active:scale-95 whitespace-nowrap"
+        title="Alternar intensidade da neve: Intensa, Tempestade, Desligada ou Suave"
+      >
+        <span id="snowIcon">❄️</span>
+        <span id="snowStatusText" class="font-medium">Neve: Intensa</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- HEADER & NAVEGAÇÃO EM BRANCO LUMINOSO (INTERCALANDO)                      -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/90 transition-all shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
       
       <!-- Marca / Logo -->
-      <a href="#" class="flex items-center gap-3 group">
-        <img 
-          src="assets/img/logo-.webp" 
-          alt="Habittari" 
-          class="w-11 h-11 object-contain rounded-lg mix-blend-multiply group-hover:scale-105 transition-transform"
-        >
+      <a href="#" class="flex items-center gap-3.5 group">
+        <div class="relative p-1 rounded-xl bg-pine-50 border border-stone-200 shadow-xs group-hover:border-gold-300 transition-colors">
+          <img 
+            src="assets/img/logo-.webp" 
+            alt="Habittari" 
+            class="w-10 h-10 object-contain rounded-lg group-hover:scale-105 transition-transform"
+          >
+        </div>
         <div class="flex flex-col">
-          <span class="text-xl font-extrabold tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">Habittari</span>
-          <span class="text-xs text-slate-400 font-medium tracking-wide uppercase">Catálogo Exclusivo</span>
+          <div class="flex items-center gap-1.5">
+            <span class="font-serif text-2xl font-bold tracking-tight text-pine-950 group-hover:text-pine-700 transition-colors">Habittari</span>
+            <span class="text-gold-500 text-xs">✦</span>
+          </div>
+          <span class="text-[10px] text-stone-500 font-semibold tracking-widest uppercase">Design & Impressão 3D</span>
         </div>
       </a>
 
@@ -70,27 +130,27 @@
           <input 
             type="text" 
             id="searchInput"
-            placeholder="Buscar por nome ou descrição..." 
-            class="w-full pl-10 pr-4 py-2.5 rounded-full text-sm bg-slate-100 border border-transparent focus:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-slate-700"
+            placeholder="Buscar por presentes, decorações ou peças..." 
+            class="w-full pl-10 pr-4 py-2.5 rounded-full text-sm bg-stone-100/90 border border-transparent focus:border-gold-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold-400/20 transition-all text-stone-800 placeholder-stone-400 shadow-xs"
           >
-          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </div>
       </div>
 
-      <!-- Botão de Carrinho no Header -->
+      <!-- Botão de Carrinho no Header (Verde Escuro com Badge Dourada) -->
       <div class="flex items-center gap-3">
         <button 
           id="cartHeaderBtn"
-          class="relative flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all text-sm font-semibold shadow-sm"
-          aria-label="Abrir Carrinho"
+          class="relative flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-pine-900 hover:bg-pine-800 text-white active:scale-95 transition-all text-sm font-semibold shadow-sm group border border-pine-700/60"
+          aria-label="Abrir Carrinho de Compras"
         >
-          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-gold-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
           </svg>
           <span class="hidden sm:inline">Meu Carrinho</span>
-          <span id="headerCartCount" class="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+          <span id="headerCartCount" class="bg-gold-500 text-pine-950 text-xs px-2 py-0.5 rounded-full font-black shadow-xs">0</span>
         </button>
       </div>
 
@@ -102,10 +162,10 @@
         <input 
           type="text" 
           id="searchMobileInput"
-          placeholder="Buscar produtos..." 
-          class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-slate-100 border border-slate-200 focus:border-slate-400 focus:bg-white focus:outline-none transition-all text-slate-700"
+          placeholder="Buscar produtos e decorações..." 
+          class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-stone-100 border border-stone-200 focus:border-gold-400 focus:bg-white focus:outline-none transition-all text-stone-800 shadow-xs"
         >
-        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
       </div>
@@ -113,43 +173,188 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- HERO BANNER                                                               -->
+  <!-- HERO BANNER (VERDE ESCURO PREDOMINANTE COM CENÁRIO E FLOCOS DO DEMO)       -->
   <!-- ========================================================================= -->
-  <section class="bg-gradient-to-b from-slate-100 to-slate-50 border-b border-slate-200/60 py-10 sm:py-14">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/70 text-emerald-800 text-xs font-semibold mb-4">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Catálogo Atualizado em Tempo Real
+  <section class="relative bg-festive-dark text-white py-14 sm:py-20 overflow-hidden">
+    
+    <!-- ======================================================================= -->
+    <!-- ARTES DE FLOCOS DE NEVE REAIS DO DEMO JINGLE BELLS                      -->
+    <!-- ======================================================================= -->
+    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
+      <!-- Floco 1 (Superior Esquerdo) -->
+      <img 
+        src="assets/img/festive/snowflake-1.png" 
+        alt="" 
+        class="absolute top-8 left-[8%] w-14 sm:w-16 opacity-60 animate-float-slow"
+      >
+      <!-- Floco 5 (Superior Direito) -->
+      <img 
+        src="assets/img/festive/snowflake-5.png" 
+        alt="" 
+        class="absolute top-10 right-[10%] w-16 sm:w-20 opacity-55 animate-float-reverse"
+      >
+      <!-- Floco 9 (Esquerda Central) -->
+      <img 
+        src="assets/img/festive/snowflake-9.png" 
+        alt="" 
+        class="absolute top-1/2 left-[3%] w-12 sm:w-14 opacity-45 animate-float-fast"
+      >
+      <!-- Floco 3 (Direita Central) -->
+      <img 
+        src="assets/img/festive/snowflake-3.png" 
+        alt="" 
+        class="absolute top-[45%] right-[5%] w-10 sm:w-12 opacity-50 animate-float-slow"
+      >
+      <!-- Floco 2 (Centro Superior) -->
+      <img 
+        src="assets/img/festive/snowflake-2.png" 
+        alt="" 
+        class="absolute top-14 left-[48%] w-8 sm:w-10 opacity-40 animate-float-reverse"
+      >
+      <!-- Floco 10 (Centro Baixo) -->
+      <img 
+        src="assets/img/festive/snowflake-10.png" 
+        alt="" 
+        class="absolute bottom-28 left-[28%] w-7 sm:w-9 opacity-35 animate-float-fast"
+      >
+    </div>
+
+    <!-- Brilho ambiental sutil (sem linhas) -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[650px] h-[350px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        
+        <!-- Coluna de Boas-Vindas & Tipografia Festiva (7 colunas) -->
+        <div class="lg:col-span-7 text-center lg:text-left">
+          
+          <!-- Arte do Sino de Natal do Demo + Badge Festivo -->
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-4">
+            <!-- Sino Oficial do Demo Jingle Bells -->
+            <img 
+              src="assets/img/festive/home-image-1.png" 
+              alt="Sinos de Natal" 
+              class="w-20 h-20 sm:w-24 sm:h-24 object-contain filter drop-shadow-lg animate-float-slow"
+            >
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-gold-400/40 text-gold-300 text-xs font-semibold backdrop-blur-md shadow-xs">
+              <span>✦</span>
+              <span class="tracking-wide uppercase font-bold text-[11px]">Coleção Especial de Natal</span>
+              <span class="text-white/40">•</span>
+              <span class="text-emerald-300 font-medium">Habittari 3D</span>
+            </div>
+          </div>
+
+          <!-- Título Principal do Demo: Bells Ring and the Birds Sing -->
+          <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.12]">
+            Bells Ring and the <br class="hidden sm:inline">
+            <span class="text-gold-300 italic font-normal">Birds Sing</span>
+          </h1>
+
+          <p class="font-serif italic text-emerald-200 text-lg sm:text-xl mt-3 font-normal">
+            A Magia do Natal Materializada com Afeto & Impressão 3D
+          </p>
+
+          <!-- Texto Acolhedor -->
+          <p class="mt-4 text-base sm:text-lg text-emerald-100/85 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+            O Natal se aproxima! É o momento de iluminar o lar, reunir a família e presentear quem amamos com significado. Encante com peças exclusivas esculpidas em PLA ecológico de alta precisão.
+          </p>
+
+          <!-- Botões de Ação estilo Jingle Bells -->
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+            <a 
+              href="#productsGrid" 
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-gold-500 hover:bg-gold-400 text-pine-950 font-extrabold text-sm shadow-xl shadow-gold-500/25 active:scale-95 transition-all group"
+            >
+              <span>🎁</span>
+              <span>Ver Coleção de Natal</span>
+              <span class="group-hover:translate-x-1 transition-transform">↓</span>
+            </a>
+
+            <a 
+              href="https://wa.me/5511964729650?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20pe%C3%A7as%20de%20Natal%20da%20Habittari" 
+              target="_blank" 
+              rel="noopener"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 backdrop-blur-md active:scale-95 transition-all"
+            >
+              <svg class="w-4 h-4 fill-emerald-400" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.698.057-1.114-.076-.26-.083-.591-.202-1.025-.391-1.832-.799-3.033-2.656-3.125-2.778-.092-.122-.743-.988-.743-1.884 0-.897.469-1.339.636-1.512.167-.173.365-.216.486-.216.122 0 .243.001.348.006.111.006.26-.042.406.31.152.366.517 1.264.563 1.356.046.091.076.198.015.319-.06.122-.091.198-.182.304-.091.107-.193.238-.276.32-.092.091-.188.19-.08.376.107.185.474.781 1.017 1.265.7.625 1.291.819 1.474.91.183.091.29.076.396-.046.107-.122.457-.533.579-.715.122-.183.244-.152.41-.091.168.06 1.066.502 1.249.593.183.092.305.137.35.213.046.077.046.444-.098.849zM12 2C6.477 2 2 6.477 2 12c0 1.891.528 3.659 1.444 5.176L2 22l4.982-1.306C8.423 21.536 10.15 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+              </svg>
+              <span>Falar no WhatsApp</span>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Coluna da Peça Estrela: Rolinha da Amizade ("Birds Sing") (5 colunas) -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div 
+            class="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-gold-400/30 glow-festive-gold transition-all duration-500 hover:scale-[1.02] cursor-pointer js-open-details group"
+            data-id="rolinha-esqueceram-de-mim"
+            title="Ver detalhes da Rolinha da Amizade"
+          >
+            <!-- Moldura da Foto da Peça -->
+            <div class="relative aspect-square w-full rounded-2xl overflow-hidden bg-pine-900/50 border border-white/10">
+              <img 
+                src="assets/img/products/rolinha-esqueceram-de-mim/rolinha%20capa.jpeg" 
+                alt="Rolinha da Amizade (Esqueceram de Mim)" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              >
+              
+              <!-- Badges Flutuantes -->
+              <span class="absolute top-3 left-3 bg-pine-950/90 backdrop-blur-md text-gold-300 border border-gold-400/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
+                🎄 Destaque de Natal
+              </span>
+
+              <span class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md text-pine-950 text-xs font-black px-3 py-1 rounded-full shadow-md">
+                R$ 12,90
+              </span>
+            </div>
+
+            <!-- Informações Rápidas -->
+            <div class="mt-4 flex items-center justify-between">
+              <div>
+                <h3 class="font-serif text-lg font-bold text-white group-hover:text-gold-300 transition-colors">
+                  Rolinha da Amizade
+                </h3>
+                <p class="text-xs text-emerald-200/80 mt-0.5">
+                  Inspirada no clássico Esqueceram de Mim
+                </p>
+              </div>
+
+              <span class="w-9 h-9 rounded-full bg-gold-500/20 text-gold-300 flex items-center justify-center group-hover:bg-gold-500 group-hover:text-pine-950 transition-all font-bold">
+                →
+              </span>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-        Design & Conforto para o seu Lar
-      </h1>
-      <p class="mt-3 sm:mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
-        Explore nossos produtos exclusivos. Adicione ao carrinho e finalize seu pedido com total agilidade direto pelo WhatsApp.
-      </p>
     </div>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- CONTEÚDO PRINCIPAL: CATÁLOGO                                              -->
+  <!-- CONTEÚDO PRINCIPAL: CATÁLOGO EM BRANCO LUMINOSO (INTERCALANDO)            -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
 
     <!-- Status Bar / Contagem -->
-    <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-stone-200">
       <div>
-        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Todos os Produtos</h2>
-        <p id="productsCount" class="text-xs sm:text-sm text-slate-500 mt-0.5">Carregando itens...</p>
+        <div class="flex items-center gap-2">
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-pine-950">Catálogo de Natal & Decoração</h2>
+          <span class="text-gold-500 text-sm">✦</span>
+        </div>
+        <p id="productsCount" class="text-xs sm:text-sm text-stone-500 mt-0.5">Carregando itens exclusivos...</p>
       </div>
 
       <!-- Filtro de ordenação simples -->
       <div class="flex items-center gap-2">
-        <label for="sortSelect" class="text-xs sm:text-sm text-slate-500 hidden sm:inline">Ordenar por:</label>
+        <label for="sortSelect" class="text-xs sm:text-sm text-stone-500 hidden sm:inline">Ordenar por:</label>
         <select 
           id="sortSelect"
-          class="bg-white border border-slate-300 text-slate-700 text-xs sm:text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          class="bg-white border border-stone-200 text-stone-700 text-xs sm:text-sm rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-gold-400 focus:outline-none shadow-xs font-medium"
         >
-          <option value="default">Padrão</option>
+          <option value="default">Destaques</option>
           <option value="price-asc">Menor Preço</option>
           <option value="price-desc">Maior Preço</option>
           <option value="name-asc">Nome (A - Z)</option>
@@ -164,30 +369,29 @@
 
     <!-- Feedback de Carregamento (Skeleton Loaders) -->
     <div id="loadingSkeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <!-- 4 Skeleton Cards -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col animate-pulse">
-        <div class="aspect-square bg-slate-200 rounded-xl mb-4"></div>
-        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-100 rounded w-1/2 mb-4"></div>
-        <div class="mt-auto h-9 bg-slate-200 rounded-xl"></div>
+      <div class="bg-white rounded-2xl p-4 shadow-xs border border-stone-200 flex flex-col animate-pulse">
+        <div class="aspect-square bg-stone-100 rounded-xl mb-4"></div>
+        <div class="h-4 bg-stone-100 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-stone-100 rounded w-1/2 mb-4"></div>
+        <div class="mt-auto h-10 bg-stone-100 rounded-xl"></div>
       </div>
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col animate-pulse">
-        <div class="aspect-square bg-slate-200 rounded-xl mb-4"></div>
-        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-100 rounded w-1/2 mb-4"></div>
-        <div class="mt-auto h-9 bg-slate-200 rounded-xl"></div>
+      <div class="bg-white rounded-2xl p-4 shadow-xs border border-stone-200 flex flex-col animate-pulse">
+        <div class="aspect-square bg-stone-100 rounded-xl mb-4"></div>
+        <div class="h-4 bg-stone-100 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-stone-100 rounded w-1/2 mb-4"></div>
+        <div class="mt-auto h-10 bg-stone-100 rounded-xl"></div>
       </div>
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col animate-pulse">
-        <div class="aspect-square bg-slate-200 rounded-xl mb-4"></div>
-        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-100 rounded w-1/2 mb-4"></div>
-        <div class="mt-auto h-9 bg-slate-200 rounded-xl"></div>
+      <div class="bg-white rounded-2xl p-4 shadow-xs border border-stone-200 flex flex-col animate-pulse">
+        <div class="aspect-square bg-stone-100 rounded-xl mb-4"></div>
+        <div class="h-4 bg-stone-100 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-stone-100 rounded w-1/2 mb-4"></div>
+        <div class="mt-auto h-10 bg-stone-100 rounded-xl"></div>
       </div>
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col animate-pulse">
-        <div class="aspect-square bg-slate-200 rounded-xl mb-4"></div>
-        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-100 rounded w-1/2 mb-4"></div>
-        <div class="mt-auto h-9 bg-slate-200 rounded-xl"></div>
+      <div class="bg-white rounded-2xl p-4 shadow-xs border border-stone-200 flex flex-col animate-pulse">
+        <div class="aspect-square bg-stone-100 rounded-xl mb-4"></div>
+        <div class="h-4 bg-stone-100 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-stone-100 rounded w-1/2 mb-4"></div>
+        <div class="mt-auto h-10 bg-stone-100 rounded-xl"></div>
       </div>
     </div>
 
@@ -197,31 +401,31 @@
     </div>
 
     <!-- Estado Vazio (Nenhum produto encontrado) -->
-    <div id="emptyState" class="hidden text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-      <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+    <div id="emptyState" class="hidden text-center py-20 bg-white rounded-3xl border border-dashed border-stone-300 p-8 shadow-xs">
+      <div class="w-16 h-16 mx-auto mb-4 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
       </div>
-      <h3 class="text-lg font-bold text-slate-800">Nenhum produto encontrado</h3>
-      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Tente ajustar os termos da sua busca ou limpar os filtros para ver todo o catálogo.</p>
-      <button id="resetSearchBtn" class="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800">
+      <h3 class="font-serif text-xl font-bold text-pine-950">Nenhum produto encontrado</h3>
+      <p class="text-sm text-stone-500 mt-1 max-w-sm mx-auto">Tente ajustar os termos da sua busca ou limpar os filtros para ver todas as peças do catálogo.</p>
+      <button id="resetSearchBtn" class="mt-5 px-5 py-2.5 bg-pine-900 text-white rounded-xl text-xs font-bold hover:bg-pine-800 transition-colors shadow-xs">
         Limpar Filtros
       </button>
     </div>
 
     <!-- Estado de Erro -->
-    <div id="errorState" class="hidden text-center py-16 bg-red-50 rounded-2xl border border-red-200 p-6">
-      <div class="w-14 h-14 mx-auto mb-3 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+    <div id="errorState" class="hidden text-center py-16 bg-berry-50 rounded-3xl border border-berry-200 p-6">
+      <div class="w-14 h-14 mx-auto mb-3 bg-berry-100 rounded-full flex items-center justify-center text-berry-600">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
       </div>
-      <h3 class="text-base font-bold text-red-800">Erro ao carregar o catálogo</h3>
-      <p id="errorMessage" class="text-sm text-red-600 mt-1 max-w-md mx-auto">
-        Não foi possível sincronizar os produtos com o Google Sheets. Verifique a URL do CSV ou a conexão.
+      <h3 class="font-serif text-lg font-bold text-berry-700">Erro ao carregar o catálogo</h3>
+      <p id="errorMessage" class="text-sm text-berry-600 mt-1 max-w-md mx-auto">
+        Não foi possível sincronizar os produtos. Verifique sua conexão.
       </p>
-      <button id="retryBtn" class="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">
+      <button id="retryBtn" class="mt-4 px-5 py-2 bg-berry-600 text-white rounded-xl text-sm font-semibold hover:bg-berry-700">
         Tentar Novamente
       </button>
     </div>
@@ -233,37 +437,40 @@
   <!-- ========================================================================= -->
   <div 
     id="productModal" 
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm hidden"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-pine-950/75 backdrop-blur-md hidden"
     role="dialog"
     aria-modal="true"
   >
     <div 
       id="productModalCard" 
-      class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] modal-enter"
+      class="bg-white text-stone-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] modal-enter border border-stone-200/80"
     >
       <!-- Cabeçalho do Modal -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 id="modalProductTitleHeader" class="text-sm font-bold text-slate-500 uppercase tracking-wider truncate pr-4">
-          Detalhes do Produto
-        </h3>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50">
+        <div class="flex items-center gap-2">
+          <span class="text-gold-500">✦</span>
+          <h3 id="modalProductTitleHeader" class="text-xs font-bold text-pine-900 uppercase tracking-widest truncate pr-4">
+            Detalhes da Peça
+          </h3>
+        </div>
         <button 
           id="closeProductModalBtn" 
-          class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors"
+          class="w-8 h-8 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-colors"
           aria-label="Fechar Detalhes"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
       <!-- Corpo do Modal: Split Galeria + Infos -->
-      <div class="overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="overflow-y-auto p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <!-- Galeria de Imagens / Carrossel -->
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-3.5">
           <!-- Visor Principal -->
-          <div class="relative aspect-square w-full bg-slate-100 rounded-2xl overflow-hidden border border-slate-200/80 group">
+          <div class="relative aspect-square w-full bg-stone-100 rounded-2xl overflow-hidden border border-stone-200/80 group">
             <img 
               id="carouselMainImg" 
               src="" 
@@ -274,10 +481,10 @@
             <!-- Botão Imagem Anterior -->
             <button 
               id="carouselPrevBtn"
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-stone-800 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
               aria-label="Imagem anterior"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
               </svg>
             </button>
@@ -285,22 +492,22 @@
             <!-- Botão Próxima Imagem -->
             <button 
               id="carouselNextBtn"
-              class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-stone-800 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
               aria-label="Próxima imagem"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
               </svg>
             </button>
 
             <!-- Badge Indicador de Imagem -->
-            <div id="carouselBadge" class="absolute bottom-3 right-3 bg-slate-900/75 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full font-medium">
+            <div id="carouselBadge" class="absolute bottom-3 right-3 bg-pine-950/80 backdrop-blur-md text-white text-[11px] px-2.5 py-1 rounded-full font-medium">
               1 / 1
             </div>
           </div>
 
           <!-- Miniaturas (Thumbnails) -->
-          <div id="carouselThumbnails" class="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+          <div id="carouselThumbnails" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             <!-- Miniaturas injetadas via JS -->
           </div>
         </div>
@@ -308,45 +515,56 @@
         <!-- Informações do Produto -->
         <div class="flex flex-col justify-between">
           <div>
-            <h2 id="modalProductName" class="text-2xl font-extrabold text-slate-900 leading-tight">
-              Nome do Produto
-            </h2>
-            <div class="mt-3 flex items-baseline gap-2">
-              <span id="modalProductPrice" class="text-3xl font-black text-emerald-600">
-                R$ 0,00
+            <!-- Badges de Tecnologia & Natal no Modal -->
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pine-50 text-pine-700 border border-pine-200">
+                <span>🌱</span> PLA Ecológico
+              </span>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gold-50 text-gold-700 border border-gold-200">
+                <span>✨</span> Impressão 3D Alta Resolução
               </span>
             </div>
 
-            <div class="mt-6 border-t border-slate-100 pt-5">
-              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Descrição</h4>
-              <p id="modalProductDescription" class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+            <h2 id="modalProductName" class="font-serif text-2xl sm:text-3xl font-bold text-pine-950 leading-tight">
+              Nome do Produto
+            </h2>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span id="modalProductPrice" class="text-3xl font-extrabold text-pine-800">
+                R$ 0,00
+              </span>
+              <span class="text-xs text-stone-400 font-medium">/ peça produzida</span>
+            </div>
+
+            <div class="mt-5 border-t border-stone-100 pt-4">
+              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Descrição & Detalhes</h4>
+              <p id="modalProductDescription" class="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
                 Descrição completa do produto.
               </p>
             </div>
           </div>
 
           <!-- Ação: Adicionar ao Carrinho -->
-          <div class="mt-8 border-t border-slate-100 pt-6">
-            <div class="flex items-center gap-4">
+          <div class="mt-8 border-t border-stone-100 pt-5">
+            <div class="flex items-center gap-3">
               <!-- Seletor de Quantidade -->
-              <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+              <div class="flex items-center border border-stone-200 rounded-xl overflow-hidden bg-stone-50">
                 <button 
                   id="modalQtyMinus"
-                  class="w-10 h-11 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors text-lg font-bold"
+                  class="w-10 h-11 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors text-base font-bold"
                 >-</button>
-                <span id="modalQtyValue" class="w-10 text-center font-bold text-slate-900 text-sm">1</span>
+                <span id="modalQtyValue" class="w-9 text-center font-bold text-pine-900 text-sm">1</span>
                 <button 
                   id="modalQtyPlus"
-                  class="w-10 h-11 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors text-lg font-bold"
+                  class="w-10 h-11 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors text-base font-bold"
                 >+</button>
               </div>
 
               <!-- Botão Adicionar -->
               <button 
                 id="modalAddToCartBtn"
-                class="flex-1 py-3 px-6 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-slate-900/10 active:scale-95 transition-all"
+                class="flex-1 py-3 px-6 rounded-xl bg-pine-900 hover:bg-pine-800 text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-md shadow-pine-950/20 active:scale-95 transition-all group"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gold-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
                 Adicionar ao Carrinho
@@ -365,97 +583,96 @@
   <!-- ========================================================================= -->
   <div 
     id="cartModal" 
-    class="fixed inset-0 z-50 flex items-center justify-center md:justify-end p-0 bg-slate-900/60 backdrop-blur-sm hidden"
+    class="fixed inset-0 z-50 flex items-center justify-center md:justify-end p-0 bg-pine-950/70 backdrop-blur-md hidden"
     role="dialog"
     aria-modal="true"
   >
     <!-- Drawer Container -->
     <div 
       id="cartModalCard"
-      class="bg-white w-full max-w-md h-full md:h-screen flex flex-col shadow-2xl modal-enter"
+      class="bg-white text-stone-900 w-full max-w-md h-full md:h-screen flex flex-col shadow-2xl modal-enter border-l border-stone-200"
     >
       <!-- Cabeçalho do Carrinho -->
-      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div class="w-9 h-9 rounded-xl bg-pine-100 text-pine-800 flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-base font-extrabold text-slate-900">Seu Carrinho</h3>
-            <span id="cartItemSummaryCount" class="text-xs text-slate-500">0 itens selecionados</span>
+            <h3 class="font-serif text-lg font-bold text-pine-950">Seu Carrinho de Natal</h3>
+            <span id="cartItemSummaryCount" class="text-xs text-stone-500">0 itens selecionados</span>
           </div>
         </div>
 
         <button 
           id="closeCartModalBtn"
-          class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors"
+          class="w-8 h-8 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-colors"
           aria-label="Fechar Carrinho"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
       <!-- Lista de Itens do Carrinho -->
-      <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 divide-y divide-slate-100">
+      <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4 divide-y divide-stone-100">
         <!-- Renderizado dinamicamente via JS -->
       </div>
 
       <!-- Estado de Carrinho Vazio -->
       <div id="emptyCartView" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div class="w-20 h-20 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
-          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
         </div>
-        <h4 class="text-base font-bold text-slate-800">Seu carrinho está vazio</h4>
-        <p class="text-xs text-slate-500 mt-1 max-w-xs">
-          Navegue pelo catálogo e adicione produtos para solicitar um orçamento direto pelo WhatsApp.
+        <h4 class="font-serif text-lg font-bold text-pine-950">Seu carrinho está vazio</h4>
+        <p class="text-xs text-stone-500 mt-1 max-w-xs leading-relaxed">
+          Navegue pelas peças decorativas e adicione itens para montar seu pedido personalizado via WhatsApp.
         </p>
         <button 
           id="continueShoppingBtn"
-          class="mt-6 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors"
+          class="mt-5 px-5 py-2.5 bg-pine-900 text-white rounded-xl text-xs font-bold hover:bg-pine-800 transition-colors shadow-xs"
         >
           Explorar Catálogo
         </button>
       </div>
 
       <!-- Rodapé / Resumo e Checkout -->
-      <div id="cartFooter" class="p-6 bg-slate-50 border-t border-slate-100 space-y-4">
+      <div id="cartFooter" class="p-6 bg-stone-50 border-t border-stone-100 space-y-4">
         
         <!-- Totais -->
         <div class="space-y-1.5">
-          <div class="flex justify-between items-center text-xs text-slate-500">
-            <span>Subtotal</span>
-            <span id="cartSubtotalValue">R$ 0,00</span>
+          <div class="flex justify-between items-center text-xs text-stone-500">
+            <span>Subtotal das Peças</span>
+            <span id="cartSubtotalValue" class="font-semibold text-stone-700">R$ 0,00</span>
           </div>
-          <div class="flex justify-between items-center text-sm font-semibold text-slate-700">
+          <div class="flex justify-between items-center text-xs text-stone-500">
             <span>Envio / Frete</span>
-            <span class="text-emerald-600 text-xs font-bold uppercase">A combinar via WhatsApp</span>
+            <span class="text-pine-700 font-bold uppercase text-[11px]">A combinar via WhatsApp</span>
           </div>
-          <div class="flex justify-between items-center text-lg font-black text-slate-900 pt-2 border-t border-slate-200">
-            <span>Total</span>
-            <span id="cartTotalValue" class="text-emerald-600">R$ 0,00</span>
+          <div class="flex justify-between items-center text-base font-bold text-pine-950 pt-2 border-t border-stone-200">
+            <span>Total Estimado</span>
+            <span id="cartTotalValue" class="text-xl font-extrabold text-pine-800">R$ 0,00</span>
           </div>
         </div>
 
         <!-- Botão WhatsApp Checkout -->
         <button 
           id="whatsappCheckoutBtn"
-          class="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-sm flex items-center justify-center gap-3 shadow-lg shadow-emerald-600/25 transition-all"
+          class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2.5 shadow-md shadow-emerald-700/20 transition-all group"
         >
-          <!-- Ícone oficial WhatsApp -->
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 fill-current group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
             <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.698.057-1.114-.076-.26-.083-.591-.202-1.025-.391-1.832-.799-3.033-2.656-3.125-2.778-.092-.122-.743-.988-.743-1.884 0-.897.469-1.339.636-1.512.167-.173.365-.216.486-.216.122 0 .243.001.348.006.111.006.26-.042.406.31.152.366.517 1.264.563 1.356.046.091.076.198.015.319-.06.122-.091.198-.182.304-.091.107-.193.238-.276.32-.092.091-.188.19-.08.376.107.185.474.781 1.017 1.265.7.625 1.291.819 1.474.91.183.091.29.076.396-.046.107-.122.457-.533.579-.715.122-.183.244-.152.41-.091.168.06 1.066.502 1.249.593.183.092.305.137.35.213.046.077.046.444-.098.849zM12 2C6.477 2 2 6.477 2 12c0 1.891.528 3.659 1.444 5.176L2 22l4.982-1.306C8.423 21.536 10.15 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
           </svg>
           Enviar Pedido pelo WhatsApp
         </button>
 
-        <p class="text-[11px] text-center text-slate-400">
-          Você será redirecionado para o WhatsApp com os itens do seu carrinho já organizados.
+        <p class="text-[11px] text-center text-stone-400">
+          Você conversará diretamente com nossa equipe para definir cores, prazos e entrega.
         </p>
 
       </div>
@@ -467,16 +684,16 @@
   <!-- ========================================================================= -->
   <button 
     id="cartFloatingBtn"
-    class="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-emerald-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group focus:outline-none"
+    class="fixed bottom-6 right-6 z-40 bg-pine-900 hover:bg-pine-800 text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 group focus:outline-none border-2 border-gold-400/60"
     aria-label="Abrir Carrinho de Compras"
   >
-    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="w-6 h-6 text-warm-100 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
     </svg>
     <!-- Badge Flutuante -->
     <span 
       id="floatingCartCount" 
-      class="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md animate-pulse"
+      class="absolute -top-1 -right-1 bg-gold-500 text-pine-950 text-xs font-black w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center border-2 border-white shadow-md"
     >
       0
     </span>
@@ -487,28 +704,47 @@
   <!-- ========================================================================= -->
   <div 
     id="toastNotification" 
-    class="fixed bottom-24 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 hidden border border-slate-700/50 toast-enter"
+    class="fixed bottom-24 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 z-50 bg-pine-950 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 hidden border border-gold-400/30 toast-enter"
   >
-    <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-      </svg>
+    <div class="w-6 h-6 rounded-full bg-gold-500 text-pine-950 flex items-center justify-center font-bold text-xs">
+      ✓
     </div>
-    <span id="toastMessage" class="text-sm font-semibold">Produto adicionado ao carrinho!</span>
+    <span id="toastMessage" class="text-sm font-medium">Produto adicionado ao carrinho!</span>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- FOOTER                                                                    -->
+  <!-- FOOTER REFINADO & ACOLHEDOR EM VERDE ESCURO                               -->
   <!-- ========================================================================= -->
-  <footer class="bg-white border-t border-slate-200 mt-20 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-      <p class="text-xs text-slate-500">
-        &copy; <span id="currentYear"></span> Habittari. Todos os direitos reservados. Catálogo estático hospedado no GitHub Pages.
-      </p>
-      <div class="flex items-center gap-4 text-xs text-slate-400">
-        <span>Design & Decoração</span>
-        <span>•</span>
-        <a href="#top" class="hover:text-slate-700 transition-colors">Voltar ao topo ↑</a>
+  <footer class="bg-[#06170F] border-t border-emerald-950/80 py-12 relative z-20 text-emerald-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+        <div>
+          <div class="flex items-center justify-center md:justify-start gap-2">
+            <span class="font-serif text-2xl font-bold text-white">Habittari</span>
+            <span class="text-gold-400 text-xs">✦</span>
+            <span class="text-xs text-emerald-300/70">Impressão 3D & Decoração Afetiva</span>
+          </div>
+          <p class="text-xs text-emerald-200/70 mt-1 max-w-md">
+            Criando memórias táteis e presentes significativos para celebrar o Natal e iluminar os lares com carinho e precisão.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 text-xs text-emerald-200/70">
+          <span class="inline-flex items-center gap-1.5 text-gold-300 font-medium">
+            <span>🎄</span> Boas Festas & Feliz Natal!
+          </span>
+          <span class="hidden sm:inline text-emerald-700">•</span>
+          <a href="#top" class="text-emerald-300 hover:text-white transition-colors">Voltar ao topo ↑</a>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-emerald-950/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-emerald-300/50">
+        <p>&copy; <span id="currentYear"></span> Habittari. Todos os direitos reservados.</p>
+        <p class="flex items-center gap-2">
+          <span>Feito camada por camada com PLA ecológico</span>
+          <span>•</span>
+          <span>Catálogo Estático</span>
+        </p>
       </div>
     </div>
   </footer>

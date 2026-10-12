@@ -469,9 +469,9 @@ function renderCategoryFilters() {
 
   container.classList.remove("hidden");
   container.innerHTML = [
-    `<button class="category-btn ${AppState.selectedCategory === 'all' ? 'active bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'} px-4 py-2 rounded-full text-xs font-bold transition-all" data-category="all">Todos os Itens</button>`,
+    `<button class="category-btn ${AppState.selectedCategory === 'all' ? 'active bg-pine-900 text-white shadow-sm font-bold' : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 font-semibold'} px-4 py-2 rounded-full text-xs transition-all" data-category="all">Todas as Peças</button>`,
     ...categories.map(cat => `
-      <button class="category-btn ${AppState.selectedCategory === cat ? 'active bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'} px-4 py-2 rounded-full text-xs font-bold transition-all" data-category="${cat}">
+      <button class="category-btn ${AppState.selectedCategory === cat ? 'active bg-pine-900 text-white shadow-sm font-bold' : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 font-semibold'} px-4 py-2 rounded-full text-xs transition-all" data-category="${cat}">
         ${cat}
       </button>
     `)
@@ -525,7 +525,7 @@ function renderProducts() {
 
   // Atualizar contador
   if (countLabel) {
-    countLabel.textContent = `${list.length} ${list.length === 1 ? "produto disponível" : "produtos disponíveis"}`;
+    countLabel.textContent = `${list.length} ${list.length === 1 ? "peça disponível" : "peças disponíveis"}`;
   }
 
   // Estado Vazio
@@ -539,19 +539,19 @@ function renderProducts() {
   if (emptyState) emptyState.classList.add("hidden");
   grid.classList.remove("hidden");
 
-  // Construir HTML dos Cards (Mobile-first, elegante com Tailwind CSS)
+  // Construir HTML dos Cards (Elegância Natalina & Detalhe de Impressão 3D)
   grid.innerHTML = list.map(product => {
     const firstImage = (product.imagens && product.imagens.length > 0) ? product.imagens[0] : PLACEHOLDER_IMAGE;
     const totalImages = product.imagens ? product.imagens.length : 1;
 
     return `
       <div 
-        class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
+        class="bg-white rounded-2xl border border-stone-200/80 overflow-hidden shadow-festive-card hover:border-gold-300 transition-all duration-300 flex flex-col group relative"
         data-id="${product.id}"
       >
         <!-- Imagem do Produto com clique para detalhes -->
         <div 
-          class="relative aspect-square w-full bg-slate-100 overflow-hidden cursor-pointer js-open-details"
+          class="relative aspect-square w-full bg-warm-100 overflow-hidden cursor-pointer js-open-details"
           data-id="${product.id}"
           title="Ver detalhes de ${product.nome}"
         >
@@ -563,15 +563,22 @@ function renderProducts() {
             onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE}';"
           >
 
-          ${product.categoria ? `
-            <span class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-              ${product.categoria}
+          <!-- Badges Superiores -->
+          <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+            ${product.categoria ? `
+              <span class="bg-white/95 backdrop-blur-md text-pine-900 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs border border-stone-100">
+                ${product.categoria}
+              </span>
+            ` : "<span></span>"}
+
+            <span class="bg-pine-900/85 backdrop-blur-md text-gold-300 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-gold-400/20">
+              <span>✦</span> 3D
             </span>
-          ` : ""}
+          </div>
 
           ${totalImages > 1 ? `
-            <span class="absolute bottom-2.5 right-2.5 bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span class="absolute bottom-2.5 right-2.5 bg-pine-950/75 backdrop-blur-md text-white text-[10px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
+              <svg class="w-3 h-3 text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
               ${totalImages} fotos
@@ -582,9 +589,15 @@ function renderProducts() {
         <!-- Conteúdo do Card -->
         <div class="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <!-- Nome do Produto (clicável para abrir modal) -->
+            <!-- Micro Tag de Fabricação 3D -->
+            <div class="flex items-center gap-1.5 text-[10px] font-semibold text-stone-400 mb-1.5 uppercase tracking-wider">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              <span>PLA Ecológico • Alta Fidelidade</span>
+            </div>
+
+            <!-- Nome do Produto -->
             <h3 
-              class="font-bold text-slate-900 text-base leading-snug line-clamp-2 hover:text-emerald-700 cursor-pointer transition-colors js-open-details"
+              class="font-serif font-bold text-pine-950 text-base leading-snug line-clamp-2 hover:text-pine-700 cursor-pointer transition-colors js-open-details"
               data-id="${product.id}"
               title="${product.nome}"
             >
@@ -592,7 +605,7 @@ function renderProducts() {
             </h3>
 
             <!-- Preço Formatado em BRL -->
-            <p class="mt-2 text-xl font-black text-emerald-600">
+            <p class="mt-2 text-xl font-black text-pine-800">
               ${formatBRL(product.preco)}
             </p>
           </div>
@@ -600,10 +613,10 @@ function renderProducts() {
           <!-- Botão Adicionar ao Carrinho -->
           <button 
             type="button"
-            class="mt-4 w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all js-add-cart-btn"
+            class="mt-4 w-full py-2.5 px-4 rounded-xl bg-pine-900 hover:bg-pine-800 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all js-add-cart-btn group"
             data-id="${product.id}"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-gold-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
             </svg>
             Adicionar ao Carrinho
@@ -836,23 +849,26 @@ function renderCartModal() {
   // Renderizar itens
   container.innerHTML = AppState.cart.map(item => {
     const itemTotal = item.product.preco * item.quantity;
+    const itemImage = (item.product.imagens && item.product.imagens.length > 0) 
+      ? item.product.imagens[0] 
+      : (item.product.imagem || PLACEHOLDER_IMAGE);
 
     return `
       <div class="py-4 flex gap-4 items-center justify-between">
         <!-- Foto miniatura -->
         <img 
-          src="${item.product.imagem || PLACEHOLDER_IMAGE}" 
+          src="${itemImage}" 
           alt="${item.product.nome}" 
-          class="w-16 h-16 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+          class="w-16 h-16 rounded-xl object-cover bg-warm-100 border border-stone-200 flex-shrink-0"
           onerror="this.src='${PLACEHOLDER_IMAGE}';"
         >
 
         <!-- Informações e Quantidade -->
         <div class="flex-1 min-w-0">
-          <h4 class="text-sm font-bold text-slate-800 truncate" title="${item.product.nome}">
+          <h4 class="font-serif text-sm font-bold text-pine-950 truncate" title="${item.product.nome}">
             ${item.product.nome}
           </h4>
-          <p class="text-xs text-slate-500 mt-0.5">
+          <p class="text-xs text-stone-500 mt-0.5">
             ${formatBRL(item.product.preco)} cada
           </p>
 
@@ -860,14 +876,14 @@ function renderCartModal() {
           <div class="flex items-center gap-2 mt-2">
             <button 
               type="button"
-              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors"
+              class="w-7 h-7 rounded-lg bg-warm-100 hover:bg-warm-200 text-stone-700 font-bold text-xs flex items-center justify-center transition-colors"
               onclick="updateCartItemQty('${item.product.id}', -1)"
               aria-label="Diminuir quantidade"
             >-</button>
-            <span class="text-xs font-bold text-slate-900 w-5 text-center">${item.quantity}</span>
+            <span class="text-xs font-bold text-pine-900 w-5 text-center">${item.quantity}</span>
             <button 
               type="button"
-              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors"
+              class="w-7 h-7 rounded-lg bg-warm-100 hover:bg-warm-200 text-stone-700 font-bold text-xs flex items-center justify-center transition-colors"
               onclick="updateCartItemQty('${item.product.id}', 1)"
               aria-label="Aumentar quantidade"
             >+</button>
@@ -878,7 +894,7 @@ function renderCartModal() {
         <div class="text-right flex flex-col items-end justify-between self-stretch">
           <button 
             type="button" 
-            class="text-slate-400 hover:text-red-500 transition-colors p-1"
+            class="text-stone-400 hover:text-berry-600 transition-colors p-1"
             onclick="removeCartItem('${item.product.id}')"
             title="Remover produto"
             aria-label="Remover produto"
@@ -887,7 +903,7 @@ function renderCartModal() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
           </button>
-          <span class="text-sm font-black text-slate-900">
+          <span class="text-sm font-black text-pine-900">
             ${formatBRL(itemTotal)}
           </span>
         </div>
@@ -937,13 +953,13 @@ function checkoutViaWhatsApp() {
 
   // 3. Montagem da mensagem final
   const mensagem = [
-    "Olá! Gostaria de fazer o seguinte pedido pelo catálogo:",
+    "🎄 *Olá, Habittari! Gostaria de fazer o seguinte pedido de Natal:*",
     "",
     itensFormatados,
     "",
-    `*Total do Pedido: ${totalFormatado}*`,
+    `✨ *Total das Peças: ${totalFormatado}*`,
     "",
-    "Poderia me informar o valor do frete e os prazos de entrega?"
+    "Poderia me informar as opções de frete, prazos de produção e entrega para o meu CEP?"
   ].join("\n");
 
   // 4. Codificação da URL
@@ -1094,16 +1110,226 @@ function setupEventListeners() {
 }
 
 // ==============================================================================
-// 11. BOOTSTRAP DA APLICAÇÃO
+// 11. SISTEMA MULTI-MODO DE NEVE (CANVAS DINÂMICO & OTIMIZADO)
+// Modos: Suave ➔ Intensa ➔ Tempestade ➔ Desligada
+// ==============================================================================
+
+const SNOW_PRESETS = {
+  suave: {
+    id: "suave",
+    icon: "❄️",
+    label: "Neve: Suave",
+    title: "Modo Atual: Neve Suave (delicada). Clique para alternar para Neve Intensa.",
+    desktopCount: 45,
+    mobileCount: 24,
+    speedMin: 0.5,
+    speedMax: 1.2,
+    wind: 0.1,
+    swing: 0.4,
+    radiusMin: 0.8,
+    radiusMax: 2.2,
+    opacityMin: 0.2,
+    opacityMax: 0.55,
+    canvasOpacity: "0.7"
+  },
+  intensa: {
+    id: "intensa",
+    icon: "❄️",
+    label: "Neve: Intensa",
+    title: "Modo Atual: Neve Intensa. Clique para alternar para Tempestade.",
+    desktopCount: 130,
+    mobileCount: 65,
+    speedMin: 0.9,
+    speedMax: 2.3,
+    wind: 0.4,
+    swing: 0.7,
+    radiusMin: 1.0,
+    radiusMax: 3.2,
+    opacityMin: 0.3,
+    opacityMax: 0.75,
+    canvasOpacity: "0.85"
+  },
+  tempestade: {
+    id: "tempestade",
+    icon: "🌨️",
+    label: "Tempestade de Neve",
+    title: "Modo Atual: Tempestade de Neve. Clique para desativar o efeito.",
+    desktopCount: 260,
+    mobileCount: 120,
+    speedMin: 2.0,
+    speedMax: 4.8,
+    wind: 1.8,
+    swing: 0.9,
+    radiusMin: 1.2,
+    radiusMax: 4.5,
+    opacityMin: 0.35,
+    opacityMax: 0.9,
+    canvasOpacity: "0.95"
+  },
+  desligada: {
+    id: "desligada",
+    icon: "⏸️",
+    label: "Neve: Desligada",
+    title: "Neve desativada. Clique para reativar em modo Suave.",
+    desktopCount: 0,
+    mobileCount: 0,
+    speedMin: 0,
+    speedMax: 0,
+    wind: 0,
+    swing: 0,
+    radiusMin: 0,
+    radiusMax: 0,
+    opacityMin: 0,
+    opacityMax: 0,
+    canvasOpacity: "0"
+  }
+};
+
+const SNOW_MODE_ORDER = ["intensa", "tempestade", "desligada", "suave"];
+
+function initSnowEffect() {
+  const canvas = document.getElementById("snowCanvas");
+  const toggleBtn = document.getElementById("toggleSnowBtn");
+  const statusText = document.getElementById("snowStatusText");
+  const snowIcon = document.getElementById("snowIcon");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+
+  // Recuperar preferência salva ou iniciar no padrão "intensa"
+  const savedMode = localStorage.getItem("habittari_snow_mode");
+  const legacyEnabled = localStorage.getItem("habittari_snow_enabled");
+  let currentMode = "intensa";
+
+  if (savedMode && SNOW_PRESETS[savedMode]) {
+    currentMode = savedMode;
+  } else if (legacyEnabled === "false") {
+    currentMode = "desligada";
+  }
+
+  const flakes = [];
+
+  function createFlake(preset, isInitial = false) {
+    const radius = Math.random() * (preset.radiusMax - preset.radiusMin) + preset.radiusMin;
+    const speedY = Math.random() * (preset.speedMax - preset.speedMin) + preset.speedMin;
+    const opacity = Math.random() * (preset.opacityMax - preset.opacityMin) + preset.opacityMin;
+
+    return {
+      x: Math.random() * (width + 100) - 50,
+      y: isInitial ? Math.random() * height : -10,
+      radius,
+      speedY,
+      swing: preset.swing,
+      angle: Math.random() * Math.PI * 2,
+      angleSpeed: Math.random() * 0.03 + 0.015,
+      opacity
+    };
+  }
+
+  function applyMode(modeKey) {
+    currentMode = modeKey;
+    const preset = SNOW_PRESETS[modeKey];
+    if (!preset) return;
+
+    localStorage.setItem("habittari_snow_mode", modeKey);
+
+    if (snowIcon) snowIcon.textContent = preset.icon;
+    if (statusText) statusText.textContent = preset.label;
+    if (toggleBtn) toggleBtn.title = preset.title;
+
+    canvas.style.opacity = preset.canvasOpacity;
+
+    if (modeKey === "desligada") {
+      canvas.classList.add("snow-disabled");
+      flakes.length = 0;
+    } else {
+      canvas.classList.remove("snow-disabled");
+      const count = window.innerWidth < 640 ? preset.mobileCount : preset.desktopCount;
+      flakes.length = 0;
+      for (let i = 0; i < count; i++) {
+        flakes.push(createFlake(preset, true));
+      }
+    }
+  }
+
+  applyMode(currentMode);
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const currentIndex = SNOW_MODE_ORDER.indexOf(currentMode);
+      const nextIndex = (currentIndex + 1) % SNOW_MODE_ORDER.length;
+      applyMode(SNOW_MODE_ORDER[nextIndex]);
+    });
+  }
+
+  window.addEventListener("resize", () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    if (currentMode !== "desligada") {
+      applyMode(currentMode);
+    }
+  });
+
+  function render() {
+    ctx.clearRect(0, 0, width, height);
+
+    if (currentMode !== "desligada" && flakes.length > 0) {
+      const preset = SNOW_PRESETS[currentMode];
+      for (let i = 0; i < flakes.length; i++) {
+        const f = flakes[i];
+        f.angle += f.angleSpeed;
+        f.y += f.speedY;
+        f.x += Math.sin(f.angle) * f.swing + preset.wind;
+
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${f.opacity})`;
+
+        // Efeito de desfoque sutil nos flocos maiores para profundidade
+        if (f.radius > 3.0) {
+          ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
+          ctx.shadowBlur = 4;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+
+        ctx.fill();
+
+        // Reposicionar quando sair da tela
+        if (f.y > height + 10) {
+          f.y = -10;
+          f.x = Math.random() * (width + 60) - 30;
+        }
+        if (f.x > width + 30) {
+          f.x = -20;
+        } else if (f.x < -30) {
+          f.x = width + 20;
+        }
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+}
+
+// ==============================================================================
+// 12. BOOTSTRAP DA APLICAÇÃO
 // ==============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Registrar event listeners
+  // 1. Inicializar efeito sutil de neve
+  initSnowEffect();
+
+  // 2. Registrar event listeners
   setupEventListeners();
 
-  // 2. Carregar carrinho persistido no LocalStorage
+  // 3. Carregar carrinho persistido no LocalStorage
   loadCartFromStorage();
 
-  // 3. Inicializar catálogo de produtos
+  // 4. Inicializar catálogo de produtos
   loadProductsData();
 });
