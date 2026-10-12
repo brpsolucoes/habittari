@@ -54,6 +54,12 @@
               200: '#eee9dd',
               300: '#ded6c3',
             },
+            ice: {
+              50: '#f5f9fc',
+              100: '#ebf2f8',
+              200: '#dbe7f2',
+              300: '#c5d8ea',
+            },
             berry: {
               50: '#fdf2f3',
               100: '#fbe4e6',
@@ -70,7 +76,7 @@
   <!-- Estilos Customizados -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-warm-50/40 text-stone-800 font-sans antialiased min-h-screen flex flex-col selection:bg-gold-500 selection:text-white relative">
+<body class="bg-ice-100 text-stone-800 font-sans antialiased min-h-screen flex flex-col selection:bg-gold-500 selection:text-white relative">
 
   <!-- Canvas interativo para partículas suaves de neve -->
   <canvas id="snowCanvas" aria-hidden="true"></canvas>
@@ -175,7 +181,7 @@
   <!-- ========================================================================= -->
   <!-- HERO BANNER (VERDE ESCURO PREDOMINANTE COM CENÁRIO E FLOCOS DO DEMO)       -->
   <!-- ========================================================================= -->
-  <section class="relative bg-festive-dark text-white py-14 sm:py-20 overflow-hidden">
+  <section class="relative bg-festive-dark text-white pt-14 sm:pt-20 pb-32 sm:pb-44 lg:pb-60 overflow-hidden">
     
     <!-- ======================================================================= -->
     <!-- ARTES DE FLOCOS DE NEVE REAIS DO DEMO JINGLE BELLS                      -->
@@ -244,10 +250,10 @@
             </div>
           </div>
 
-          <!-- Título Principal do Demo: Bells Ring and the Birds Sing -->
+          <!-- Título Principal: O Encanto do Natal em Cada Detalhe -->
           <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.12]">
-            Bells Ring and the <br class="hidden sm:inline">
-            <span class="text-gold-300 italic font-normal">Birds Sing</span>
+            O Encanto do Natal em <br class="hidden sm:inline">
+            <span class="text-gold-300 italic font-normal">Cada Detalhe</span>
           </h1>
 
           <p class="font-serif italic text-emerald-200 text-lg sm:text-xl mt-3 font-normal">
@@ -285,7 +291,7 @@
 
         </div>
 
-        <!-- Coluna da Peça Estrela: Rolinha da Amizade ("Birds Sing") (5 colunas) -->
+        <!-- Coluna da Peça Estrela: Rolinha da Amizade (5 colunas) -->
         <div class="lg:col-span-5 flex justify-center">
           <div 
             class="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-gold-400/30 glow-festive-gold transition-all duration-500 hover:scale-[1.02] cursor-pointer js-open-details group"
@@ -330,6 +336,19 @@
 
       </div>
     </div>
+
+    <!-- ======================================================================= -->
+    <!-- PAISAGEM NATALINA EM BRANCO GELO (#EBF2F8): MONTANHAS, PINHEIROS E PRESENTES -->
+    <!-- Renderizada em altura natural proporcional, sem cortes nem divs sobrepostas -->
+    <!-- ======================================================================= -->
+    <div class="absolute -bottom-px left-0 w-full pointer-events-none select-none z-10 leading-none">
+      <img 
+        src="assets/img/festive/home-landscape-ice.png" 
+        alt="Paisagem de Inverno em Branco Gelo" 
+        class="w-full h-auto block"
+      >
+    </div>
+
   </section>
 
   <!-- ========================================================================= -->
