@@ -63,6 +63,20 @@ const DEMO_PRODUCTS = [
       "assets/img/products/rolinha-esqueceram-de-mim/rolinha%20capa.jpeg",
       "assets/img/products/rolinha-esqueceram-de-mim/rolinha%2001.jpeg"
     ]
+  },
+  {
+    id: "enfeite-de-porta-presepio",
+    nome: "Enfeite de Porta - Presépio",
+    categoria: "Decoração",
+    preco: 27.90,
+    descricao: "Enfeite de canto de porta (cantoneira de batente) com a cena tradicional do Presépio de Natal. Uma peça delicada e cheia de significado para acolher quem chega ao seu lar com o verdadeiro espírito natalino.\n\nEncaixe prático diretamente no batente da porta, moldura, janela ou prateleira.\n\n• Fabricação: Impresso em 3D com alta precisão\n• Material: PLA ecológico e resistente\n• Cores disponíveis: Verde, Bege, Branco e Vermelho",
+    imagens: [
+      "assets/img/products/Enfeite%20de%20Porta%20-%20Pres%C3%A9pio/image.jpg",
+      "assets/img/products/Enfeite%20de%20Porta%20-%20Pres%C3%A9pio/image.jpg%2001.jpg",
+      "assets/img/products/Enfeite%20de%20Porta%20-%20Pres%C3%A9pio/image.jpg%2002.jpg",
+      "assets/img/products/Enfeite%20de%20Porta%20-%20Pres%C3%A9pio/image.jpg%2003.jpg",
+      "assets/img/products/Enfeite%20de%20Porta%20-%20Pres%C3%A9pio/image.jpg%2004.jpg"
+    ]
   }
 ];
 
